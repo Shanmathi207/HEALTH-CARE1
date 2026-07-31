@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Care | Doctor Suggestion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: var(--neutral-50);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 3rem 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-display);
+        }
+
+        .symptom-summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--white);
+            border: 1px solid var(--neutral-200);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            color: var(--neutral-600);
+        }
+
+        .recommendation-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            border: 1px solid var(--neutral-200);
+            margin-bottom: 2rem;
+        }
+
+        .rec-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .rec-label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: var(--text-xs);
+            opacity: 0.9;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .specialist-name {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            font-family: var(--font-display);
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-reason {
+            font-size: var(--text-lg);
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .rec-body {
+            padding: 2rem;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box {
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+        }
+
+        .box-label {
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .urgency-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: var(--text-xs);
+        }
+
+        .risk-meter {
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .risk-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .risk-fill.medium {
+            background: #f59e0b;
+        }
+
+        .risk-fill.high {
+            background: #ef4444;
+        }
+
+        .risk-fill.low {
+            background: #10b981;
+        }
+
+        .department-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dept-info h4 {
+            color: var(--primary-blue-dark);
+            margin-bottom: 0.25rem;
+            font-size: var(--text-lg);
+        }
+
+        .dept-info p {
+            color: var(--neutral-600);
+            font-size: var(--text-sm);
+            margin-bottom: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .disclaimer-box {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--neutral-50);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .emergency-banner {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            display: none;
+        }
+
+        .emergency-icon {
+            color: var(--danger-red);
+            font-size: 1.5rem;
+        }
+
+        .emergency-content h5 {
+            color: #991b1b;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .emergency-content p {
+            color: #b91c1c;
+            font-size: var(--text-sm);
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 600px) {
+            .department-action {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
+                    <path d="M16 8L16 24M8 16L24 16" stroke="white" stroke-width="3" stroke-linecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="white" />
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                            <stop offset="0%" stop-color="#2563eb" />
+                            <stop offset="100%" stop-color="#1e40af" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">Smart Care</span>
+            </div>
+            <button class="btn btn-outline" onclick="window.location.href='patient-home.html'">Back to Home</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Doctor Recommendation</h1>
+            <div class="symptom-summary">
+                <span>Condition Detected:</span>
+                <strong id="detected-condition">Analyzing...</strong>
+            </div>
+        </div>
+
+        <!-- Emergency Warning (shown dynamically for high-risk cases) -->
+        <div class="emergency-banner" id="emergency-banner">
+            <div class="emergency-icon">🚨</div>
+            <div class="emergency-content">
+                <h5>Critical Symptoms Detected</h5>
+                <p>Your symptoms indicate a potential medical emergency. Please visit the nearest Emergency Room
+                    immediately.</p>
+            </div>
+        </div>
+
+        <div class="recommendation-card">
+            <div class="rec-header">
+                <div class="rec-label">Primary Suggestion</div>
+                <div class="specialist-name" id="specialist-name">General Physician</div>
+                <div class="rec-reason" id="rec-reason">
+                    Based on your reported symptoms, our AI model has generated a specialist recommendation.
+                </div>
+            </div>
+
+            <div class="rec-body">
+                <div class="risk-grid">
+                    <!-- Urgency Card -->
+                    <div class="info-box">
+                        <div class="box-label">
+                            Urgency Level
+                            <span class="urgency-badge" id="urgency-badge" style="background:#fef3c7; color:#92400e;">Consult Soon</span>
+                        </div>
+                        <h4 id="urgency-heading" style="font-size:1.25rem; font-weight:700; color:var(--neutral-900);">Within 24-48 Hours
+                        </h4>
+                        <p id="urgency-detail" style="font-size:0.875rem; color:var(--neutral-600); margin-bottom:0;">
+                            Your symptoms are concerning but not immediately life-threatening. Schedule a visit soon.
+                        </p>
+                    </div>
+
+                    <!-- Risk Card -->
+                    <div class="info-box">
+                        <div class="box-label">
+                            Risk Assessment
+                            <strong id="risk-level-label" style="color:#d97706;">Moderate</strong>
+                        </div>
+                        <div class="risk-meter">
+                            <div class="risk-fill medium" id="risk-fill-bar" style="width: 60%"></div>
+                        </div>
+                        <p id="risk-detail" style="font-size:0.875rem; color:var(--neutral-600); margin-top:0.75rem; margin-bottom:0;">
+                            Moderate confidence match. Early consultation recommended.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Section -->
+                <div class="department-action">
+                    <div class="dept-info">
+                        <h4 id="dept-name">Department (OPD)</h4>
+                        <p id="dept-doctor-info">Doctor information loading...</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="window.location.href='digital-token.html'">
+                            Generate OPD Token
+                        </button>
+                        <button class="btn btn-outline" id="map-button">
+                            View Hospital Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer-box">
+            <strong>Medical Disclaimer:</strong> This AI-generated recommendation is for informational purposes only and
+            does not constitute a medical diagnosis. Always consult a qualified healthcare professional for medical
+            advice. If you are experiencing a medical emergency, call emergency services immediately.
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+        // Populate this page using real prediction + doctor data
+        // saved earlier in patient-home.html
+        // ---------------------------------------------------------
+        const specialist = localStorage.getItem('suggestedSpecialist') || 'General Physician';
+        const disease = localStorage.getItem('predictedDisease') || 'your reported symptoms';
+        const confidence = parseFloat(localStorage.getItem('predictionConfidence') || '45');
+        const selectedDoctorRaw = localStorage.getItem('selectedDoctor');
+        const doctor = selectedDoctorRaw ? JSON.parse(selectedDoctorRaw) : null;
+
+        document.getElementById('detected-condition').textContent = disease;
+        document.getElementById('specialist-name').textContent = specialist;
+        document.getElementById('rec-reason').textContent =
+            `Based on your reported symptoms, this may indicate ${disease} (${confidence}% match). A ${specialist} is the most appropriate specialist for this condition.`;
+
+        // ---------------------------------------------------------
+        // Risk level derived from real model confidence
+        // ---------------------------------------------------------
+        const riskFill = document.getElementById('risk-fill-bar');
+        const riskLabel = document.getElementById('risk-level-label');
+        const riskDetail = document.getElementById('risk-detail');
+        const urgencyBadge = document.getElementById('urgency-badge');
+        const urgencyHeading = document.getElementById('urgency-heading');
+        const urgencyDetail = document.getElementById('urgency-detail');
+        const emergencyBanner = document.getElementById('emergency-banner');
+
+        riskFill.style.width = `${confidence}%`;
+
+        if (confidence > 60) {
+            riskFill.className = 'risk-fill high';
+            riskLabel.textContent = 'High';
+            riskLabel.style.color = '#dc2626';
+            riskDetail.textContent = `High confidence match (${confidence}%) for ${disease}. Please consult a specialist promptly.`;
+
+            urgencyBadge.textContent = 'Consult Soon';
+            urgencyBadge.style.background = '#fee2e2';
+            urgencyBadge.style.color = '#991b1b';
+            urgencyHeading.textContent = 'Within 24 Hours';
+            urgencyDetail.textContent = 'Your symptoms show a strong pattern match. Please schedule a visit as soon as possible.';
+
+        } else if (confidence > 35) {
+            riskFill.className = 'risk-fill medium';
+            riskLabel.textContent = 'Moderate';
+            riskLabel.style.color = '#d97706';
+            riskDetail.textContent = `Moderate confidence match (${confidence}%) for ${disease}. Early consultation recommended.`;
+
+            urgencyBadge.textContent = 'Consult Soon';
+            urgencyBadge.style.background = '#fef3c7';
+            urgencyBadge.style.color = '#92400e';
+            urgencyHeading.textContent = 'Within 24-48 Hours';
+            urgencyDetail.textContent = 'Your symptoms are concerning but not immediately life-threatening. Schedule a visit soon.';
+
+        } else {
+            riskFill.className = 'risk-fill low';
+            riskLabel.textContent = 'Low';
+            riskLabel.style.color = '#059669';
+            riskDetail.textContent = `Lower confidence match (${confidence}%). Consider adding more symptoms for a more accurate result, or monitor and consult if symptoms persist.`;
+
+            urgencyBadge.textContent = 'Monitor';
+            urgencyBadge.style.background = '#dcfce7';
+            urgencyBadge.style.color = '#166534';
+            urgencyHeading.textContent = 'Within a Few Days';
+            urgencyDetail.textContent = 'Symptoms appear mild. Monitor and consult a doctor if they worsen or persist.';
+        }
+
+        // ---------------------------------------------------------
+        // Department / doctor info
+        // ---------------------------------------------------------
+        if (doctor) {
+            document.getElementById('dept-name').textContent = `${specialist} Department (OPD)`;
+            document.getElementById('dept-doctor-info').textContent = `${doctor.hospital} • ${doctor.doctor} Available`;
+        } else {
+            document.getElementById('dept-name').textContent = `${specialist} Department (OPD)`;
+            document.getElementById('dept-doctor-info').textContent = 'No doctor selected yet — please go back and choose one.';
+        }
+
+        // ---------------------------------------------------------
+        // Real "View Hospital Map" button -> opens Google Maps search
+        // ---------------------------------------------------------
+        document.getElementById('map-button').addEventListener('click', () => {
+            const query = doctor
+                ? `${doctor.hospital}, ${doctor.location || 'Erode'}`
+                : 'hospitals in Erode';
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            window.open(mapsUrl, '_blank');
+        });
+    </script>
+</body>
+
+</html>

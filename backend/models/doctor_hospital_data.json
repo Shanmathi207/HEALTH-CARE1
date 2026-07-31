@@ -1,0 +1,140 @@
+{
+  "Cardiologist": [
+    {
+      "doctor": "Dr. Arun Kumar",
+      "hospital": "Kovai Medical Center and Hospital (KMCH Erode)",
+      "location": "Erode",
+      "availability": "10:00 AM - 1:00 PM"
+    },
+    {
+      "doctor": "Dr. Priya Sundaram",
+      "hospital": "Lotus Hospital",
+      "location": "Erode",
+      "availability": "2:00 PM - 5:00 PM"
+    },
+    {
+      "doctor": "Dr. Senthil Kumar",
+      "hospital": "Erode Medical Centre",
+      "location": "Erode",
+      "availability": "9:00 AM - 12:00 PM"
+    }
+  ],
+  "Dermatologist": [
+    {
+      "doctor": "Dr. Meena Raj",
+      "hospital": "Erode Medical Trust Hospital",
+      "location": "Erode",
+      "availability": "9:00 AM - 12:00 PM"
+    },
+    {
+      "doctor": "Dr. Kavitha Ramesh",
+      "hospital": "Sri Ramakrishna Skin Clinic",
+      "location": "Erode",
+      "availability": "4:00 PM - 7:00 PM"
+    }
+  ],
+  "Gastroenterologist": [
+    {
+      "doctor": "Dr. Vijay Anand",
+      "hospital": "Erode Government Hospital",
+      "location": "Erode",
+      "availability": "10:00 AM - 1:00 PM"
+    },
+    {
+      "doctor": "Dr. Latha Krishnan",
+      "hospital": "Lotus Hospital",
+      "location": "Erode",
+      "availability": "3:00 PM - 6:00 PM"
+    }
+  ],
+  "Endocrinologist": [
+    {
+      "doctor": "Dr. Rajesh Babu",
+      "hospital": "KMCH Erode",
+      "location": "Erode",
+      "availability": "11:00 AM - 2:00 PM"
+    },
+    {
+      "doctor": "Dr. Deepa Manoharan",
+      "hospital": "Erode Medical Centre",
+      "location": "Erode",
+      "availability": "9:00 AM - 12:00 PM"
+    }
+  ],
+  "General Physician": [
+    {
+      "doctor": "Dr. Suresh Babu",
+      "hospital": "Erode Government Hospital",
+      "location": "Erode",
+      "availability": "9:00 AM - 1:00 PM"
+    },
+    {
+      "doctor": "Dr. Anitha Kumari",
+      "hospital": "Erode Medical Trust Hospital",
+      "location": "Erode",
+      "availability": "10:00 AM - 2:00 PM"
+    },
+    {
+      "doctor": "Dr. Manoj Prabhu",
+      "hospital": "Lotus Hospital",
+      "location": "Erode",
+      "availability": "4:00 PM - 8:00 PM"
+    }
+  ],
+  "Neurologist": [
+    {
+      "doctor": "Dr. Karthik Raja",
+      "hospital": "KMCH Erode",
+      "location": "Erode",
+      "availability": "10:00 AM - 1:00 PM"
+    },
+    {
+      "doctor": "Dr. Sangeetha Ravi",
+      "hospital": "Erode Medical Centre",
+      "location": "Erode",
+      "availability": "2:00 PM - 5:00 PM"
+    }
+  ],
+  "Orthopedic": [
+    {
+      "doctor": "Dr. Bala Murugan",
+      "hospital": "Lotus Hospital",
+      "location": "Erode",
+      "availability": "9:00 AM - 12:00 PM"
+    },
+    {
+      "doctor": "Dr. Nandhini Selvam",
+      "hospital": "Erode Government Hospital",
+      "location": "Erode",
+      "availability": "3:00 PM - 6:00 PM"
+    }
+  ],
+  "Pulmonologist": [
+    {
+      "doctor": "Dr. Ganesh Moorthy",
+      "hospital": "Erode Medical Trust Hospital",
+      "location": "Erode",
+      "availability": "10:00 AM - 1:00 PM"
+    },
+    {
+      "doctor": "Dr. Revathi Shankar",
+      "hospital": "KMCH Erode",
+      "location": "Erode",
+      "availability": "2:00 PM - 4:00 PM"
+    }
+  ],
+  "ENT Specialist": [
+    {
+      "doctor": "Dr. Prakash Chandran",
+      "hospital": "Erode Medical Centre",
+      "location": "Erode",
+      "availability": "9:00 AM - 12:00 PM"
+    },
+    {
+      "doctor": "Dr. Divya Bharathi",
+      "hospital": "Lotus Hospital",
+      "location": "Erode",
+      "availability": "1:00 PM - 4:00 PM"
+    }
+  ]
+}

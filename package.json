@@ -1,0 +1,15 @@
+{
+  "name": "smart-care-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Run the Smart Care frontend and backend together for local development.",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix backend start\" \"npm --prefix frontend run dev\"",
+    "backend": "npm --prefix backend start",
+    "frontend": "npm --prefix frontend run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

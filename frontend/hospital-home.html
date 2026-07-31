@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Care Hospital Admin Dashboard">
+    <title>Hospital Admin - Smart Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Dashboard Specific Styles */
+        body {
+            background-color: var(--neutral-50);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--neutral-900);
+            color: var(--neutral-300);
+            border-right: 1px solid var(--neutral-800);
+            padding: var(--space-6);
+            position: fixed;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--neutral-700);
+        }
+
+        .sidebar-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .sidebar-header h3 {
+            color: var(--white);
+            margin: 0;
+            font-size: var(--text-lg);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--neutral-400);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: var(--neutral-800);
+            color: var(--white);
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            padding: var(--space-8);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-8);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--neutral-800);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.25rem;
+            border: 2px solid var(--neutral-200);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            transition: all var(--transition-base);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue-light);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .card-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .icon-blue {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .icon-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .icon-orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .icon-red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--neutral-900);
+            font-family: var(--font-display);
+            margin-bottom: var(--space-1);
+        }
+
+        .stat-trend {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: var(--success-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        /* Chart Section (Mockup) */
+        .chart-container {
+            grid-column: span 3;
+            height: 400px;
+        }
+
+        .side-stats {
+            grid-column: span 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        .chart-mockup {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+            border-bottom: 2px solid var(--neutral-200);
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding-bottom: 0;
+            margin-top: var(--space-4);
+        }
+
+        .bar {
+            width: 40px;
+            background: var(--primary-blue);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease-out;
+        }
+
+        /* Table */
+        .table-container {
+            grid-column: span 4;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--space-4);
+        }
+
+        th {
+            text-align: left;
+            padding: var(--space-4);
+            color: var(--neutral-500);
+            font-size: var(--text-sm);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        td {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+            color: var(--neutral-700);
+            font-size: var(--text-sm);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: var(--neutral-400);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-busy {
+            background-color: var(--danger-red);
+        }
+
+        .status-moderate {
+            background-color: var(--warning-orange);
+        }
+
+        .status-free {
+            background-color: var(--success-green);
+        }
+
+        /* Priority Markers */
+        .priority-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .priority-normal {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .priority-high {
+            background: #ffedd5;
+            color: #d97706;
+        }
+
+        .priority-emergency {
+            background: #fee2e2;
+            color: #dc2626;
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .patient-avatar {
+            width: 32px;
+            height: 32px;
+            background: #e0e7ff;
+            color: var(--primary-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 600px;
+            z-index: 1001;
+            box-shadow: var(--shadow-2xl);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--neutral-700);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+        }
+
+        .filter-tag.active {
+            background: var(--primary-blue) !important;
+            color: white !important;
+        }
+
+        /* Finance Specific Styles */
+        .revenue-stat {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .revenue-stat.pending {
+            border-left-color: var(--warning-orange);
+        }
+
+        .revenue-stat.total {
+            border-left-color: var(--success-green);
+        }
+
+        .payment-pill {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pay-cash {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .pay-upi {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .pay-card {
+            background: #f5f3ff;
+            color: #5b21b6;
+        }
+
+        .pay-online {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        /* Inventory Stock Status */
+        .stock-pill {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .stock-in {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stock-low {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .stock-out {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .item-category {
+            padding: 2px 8px;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-blue);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"></div>
+                <h3>Smart Care Admin</h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" onclick="showSection('overview')">
+                    <span>📊</span> Overview
+                </div>
+                <div class="nav-item" onclick="showSection('departments')">
+                    <span>🏢</span> Departments
+                </div>
+                <div class="nav-item" onclick="showSection('staff')">
+                    <span>👨‍⚕️</span> Staff Management
+                </div>
+                <div class="nav-item" onclick="showSection('patients')">
+                    <span>👥</span> Patients
+                </div>
+                <div class="nav-item" onclick="showSection('finance')">
+                    <span>💰</span> Finance
+                </div>
+                <div class="nav-item" onclick="showSection('inventory')">
+                    <span>🏥</span> Inventory
+                </div>
+                <div class="nav-item" style="margin-top: auto; color: var(--danger-red);" onclick="logout()">
+                    <span>🚪</span> Logout
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <header>
+                    <h1 id="page-title" style="margin-bottom: 0.5rem;">Hospital Overview</h1>
+                    <p id="page-desc" style="color: var(--neutral-500); margin: 0;">Real-time insights and performance
+                        metrics.</p>
+                </header>
+                <div class="user-profile">
+                    <span style="font-weight: 600; color: var(--neutral-700);">Admin User</span>
+                    <div class="user-avatar">AD</div>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview-section">
+                <div class="dashboard-grid">
+                    <!-- Stat 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Patients Today</span>
+                            <div class="card-icon icon-blue">👥</div>
+                        </div>
+                        <div class="stat-value">1,284</div>
+                        <div class="stat-trend trend-up">
+                            <span>↑ 12%</span> vs yesterday
+                        </div>
+                    </div>
+
+                    <!-- Stat 2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Avg. Wait Time</span>
+                            <div class="card-icon icon-orange">⏳</div>
+                        </div>
+                        <div class="stat-value">18m</div>
+                        <div class="stat-trend trend-down">
+                            <span>↓ 2m</span> improved
+                        </div>
+                    </div>
+
+                    <!-- Stat 3 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Staff Active</span>
+                            <div class="card-icon icon-green">👨‍⚕️</div>
+                        </div>
+                        <div class="stat-value">42</div>
+                        <div class="stat-trend">
+                            <span style="color: var(--neutral-500);">/ 50 scheduled</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Bed Occupancy</span>
+                            <div class="card-icon icon-red">🛏️</div>
+                        </div>
+                        <div class="stat-value">85%</div>
+                        <div class="stat-trend trend-up">
+                            <span>↑ High Demand</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="card chart-container">
+                        <div class="card-header">
+                            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--neutral-900); margin: 0;">
+                                Patient Flow Analytics</h3>
+                            <select
+                                style="padding: 4px 12px; border: 1px solid var(--neutral-300); border-radius: var(--radius-md);">
+                                <option>This Week</option>
+                                <option>Today</option>
+                                <option>This Month</option>
+                            </select>
+                        </div>
+                        <div class="chart-mockup">
+                            <div class="bar" style="height: 40%;" title="Mon"></div>
+                            <div class="bar" style="height: 65%;" title="Tue"></div>
+                            <div class="bar" style="height: 55%;" title="Wed"></div>
+                            <div class="bar" style="height: 80%;" title="Thu"></div>
+                            <div class="bar" style="height: 90%;" title="Fri"></div>
+                            <div class="bar" style="height: 60%;" title="Sat"></div>
+                            <div class="bar" style="height: 30%;" title="Sun"></div>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-around; margin-top: 10px; color: var(--neutral-500); font-size: 0.8rem;">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+
+                    <!-- Side Stats -->
+                    <div class="side-stats">
+                        <div class="card" style="flex: 1;">
+                            <div class="card-header">
+                                <span class="card-title">Revenue (Daily)</span>
+                            </div>
+                            <div class="stat-value" style="font-size: 2rem;">$45.2k</div>
+                            <div class="stat-trend trend-up">On target</div>
+                            <div
+                                style="margin-top: 20px; height: 4px; background: var(--neutral-100); border-radius: 2px;">
+                                <div
+                                    style="width: 75%; height: 100%; background: var(--success-green); border-radius: 2px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="flex: 1;">
+                            <h4 style="font-size: 1rem; margin-bottom: 1rem;">Quick Actions</h4>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;"
+                                    onclick="showSection('staff')">👨‍⚕️ Manage Staff</button>
+                                <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;"
+                                    onclick="showSection('departments')">🏢 Manage Departments</button>
+                                <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;">📢
+                                    Broadcast Alert</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Departments Section -->
+            <div id="departments-section" style="display: none;">
+                <div class="card table-container"
+                    style="border: 2px solid var(--primary-blue-light); background: linear-gradient(to bottom, #ffffff, #f8faff);">
+                    <div class="card-header" style="flex-wrap: wrap; gap: var(--space-4);">
+                        <div>
+                            <h2 style="font-size: 1.5rem; color: var(--neutral-900);">Department Control Center</h2>
+                            <p style="color: var(--neutral-500); font-size: 0.875rem;">Manage OPD slots, staff
+                                assignments, and emergency protocols.</p>
+                        </div>
+                        <div style="display: flex; gap: var(--space-3); margin-left: auto;">
+                            <button class="btn btn-primary" onclick="showAddDeptModal()">+ New Department</button>
+                        </div>
+                    </div>
+
+                    <table id="departments-table">
+                        <thead>
+                            <tr>
+                                <th>Dept Info</th>
+                                <th>OPD Timings</th>
+                                <th>Assigned Doctors</th>
+                                <th>Queue Limit</th>
+                                <th>Status</th>
+                                <th>Emergency Support</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dept 1 -->
+                            <tr class="dept-row">
+                                <td>
+                                    <div style="font-weight: 600; color: var(--neutral-900);">Cardiology</div>
+                                    <div style="font-size: 0.75rem; color: var(--neutral-500);">Code: CARD-001</div>
+                                </td>
+                                <td>09:00 - 17:00</td>
+                                <td>
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <span style="font-size: 0.8rem;">Dr. Sarah Smith (Head)</span>
+                                        <span style="font-size: 0.75rem; color: var(--primary-blue); cursor: pointer;"
+                                            onclick="showEmergencySwapModal('Cardiology')">⇄ Emergency Swap</span>
+                                    </div>
+                                </td>
+                                <td>50 / session</td>
+                                <td>
+                                    <span class="badge badge-success">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox" checked onchange="toggleEmergency(this, 'Cardiology')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="editDept(1)">Edit</button>
+                                    <button class="btn btn-outline btn-sm"
+                                        style="color: var(--danger-red); border-color: var(--danger-red);"
+                                        onclick="toggleDeptStatus(this, true)">Disable</button>
+                                </td>
+                            </tr>
+                            <!-- Dept 2 -->
+                            <tr class="dept-row">
+                                <td>
+                                    <div style="font-weight: 600; color: var(--neutral-900);">Pediatrics</div>
+                                    <div style="font-size: 0.75rem; color: var(--neutral-500);">Code: PED-002</div>
+                                </td>
+                                <td>10:00 - 18:00</td>
+                                <td>
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <span style="font-size: 0.8rem;">Dr. Michael Brown</span>
+                                        <span style="font-size: 0.75rem; color: var(--primary-blue); cursor: pointer;"
+                                            onclick="showEmergencySwapModal('Pediatrics')">⇄ Emergency Swap</span>
+                                    </div>
+                                </td>
+                                <td>40 / session</td>
+                                <td>
+                                    <span class="badge badge-success">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox" onchange="toggleEmergency(this, 'Pediatrics')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="editDept(2)">Edit</button>
+                                    <button class="btn btn-outline btn-sm"
+                                        style="color: var(--danger-red); border-color: var(--danger-red);"
+                                        onclick="toggleDeptStatus(this, true)">Disable</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Staff Management Section -->
+            <div id="staff-section" style="display: none;">
+                <div class="card table-container"
+                    style="border: 2px solid var(--primary-blue-light); background: linear-gradient(to bottom, #ffffff, #f8faff);">
+                    <div class="card-header" style="flex-wrap: wrap; gap: var(--space-4);">
+                        <div>
+                            <h2 style="font-size: 1.5rem; color: var(--neutral-900);">System Staff</h2>
+                            <p style="color: var(--neutral-500); font-size: 0.875rem;">Create profiles and assign
+                                hospital roles.</p>
+                        </div>
+                        <div style="display: flex; gap: var(--space-3); margin-left: auto;">
+                            <button class="btn btn-primary" onclick="showAddStaffModal()">+ Add New Staff</button>
+                        </div>
+
+                        <!-- Role Filters -->
+                        <div
+                            style="width: 100%; display: flex; gap: var(--space-2); margin-top: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--neutral-100);">
+                            <div class="filter-tag active" onclick="filterStaff(this, 'all')"
+                                style="padding: 6px 16px; background: var(--neutral-100); color: var(--neutral-600); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                All Staff</div>
+                            <div class="filter-tag" onclick="filterStaff(this, 'doctor')"
+                                style="padding: 6px 16px; background: var(--neutral-100); color: var(--neutral-600); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                Doctors</div>
+                            <div class="filter-tag" onclick="filterStaff(this, 'nurse')"
+                                style="padding: 6px 16px; background: var(--neutral-100); color: var(--neutral-600); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                Nurses</div>
+                            <div class="filter-tag" onclick="filterStaff(this, 'receptionist')"
+                                style="padding: 6px 16px; background: var(--neutral-100); color: var(--neutral-600); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                Receptionist</div>
+                        </div>
+                    </div>
+
+                    <table id="staff-table">
+                        <thead>
+                            <tr>
+                                <th>Staff Profile</th>
+                                <th>System Role</th>
+                                <th>Assignment</th>
+                                <th>Status</th>
+                                <th>Shift</th>
+                                <th>Account</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="staff-row doctor">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                        <div class="user-avatar"
+                                            style="width: 32px; height: 32px; font-size: 0.8rem; background: var(--primary-blue);">
+                                            SS</div>
+                                        <span style="font-weight: 600;">Dr. Sarah Smith</span>
+                                    </div>
+                                </td>
+                                <td><span
+                                        style="background: rgba(37, 99, 235, 0.1); color: var(--primary-blue); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">DOCTOR</span>
+                                </td>
+                                <td>General Medicine</td>
+                                <td>
+                                    <select onchange="updateRowStatus(this)"
+                                        style="border: none; background: transparent; color: var(--success-green); font-weight: 600;">
+                                        <option value="available">● Available</option>
+                                        <option value="duty">● On Duty</option>
+                                        <option value="off">● Off Duty</option>
+                                    </select>
+                                </td>
+                                <td>09:00 - 17:00</td>
+                                <td><span class="badge badge-success">ACTIVE</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="editStaff(1)">Edit</button>
+                                    <button class="btn btn-outline btn-sm"
+                                        style="color: var(--danger-red); border-color: var(--danger-red);"
+                                        onclick="toggleAccount(this, true)">Suspend</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Patient Management Section -->
+            <div id="patients-section" style="display: none;">
+                <div class="card table-container"
+                    style="border: 2px solid var(--primary-blue-light); background: linear-gradient(to bottom, #ffffff, #f8faff);">
+                    <div class="card-header" style="flex-wrap: wrap; gap: var(--space-4);">
+                        <div>
+                            <h2 style="font-size: 1.5rem; color: var(--neutral-900);">Patient Directory</h2>
+                            <p style="color: var(--neutral-500); font-size: 0.875rem;">Manage active visits, history,
+                                and account status.</p>
+                        </div>
+                        <div style="display: flex; gap: var(--space-3); margin-left: auto;">
+                            <div style="position: relative;">
+                                <input type="text" placeholder="Search by ID or Name..."
+                                    style="padding: 8px 12px 8px 36px; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); font-size: 0.875rem;">
+                                <span
+                                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                            </div>
+                            <button class="btn btn-primary" onclick="alert('Registering New Patient...')">+ Register
+                                Patient</button>
+                        </div>
+                    </div>
+
+                    <table id="patients-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Profile</th>
+                                <th>Active Visit</th>
+                                <th>Token</th>
+                                <th>Priority</th>
+                                <th>Visit Status</th>
+                                <th>Account</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Patient 1 -->
+                            <tr class="patient-row">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                        <div class="patient-avatar">JD</div>
+                                        <div>
+                                            <div style="font-weight: 600; color: var(--neutral-900);">John Doe</div>
+                                            <div style="font-size: 0.7rem; color: var(--neutral-500);">ID: PAT-2024-001
+                                                | 32Y, Male</div>
+                                            <div style="font-size: 0.7rem; color: var(--primary-blue);">📞 +91 98765
+                                                43210</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.85rem; font-weight: 500;">Cardiology</div>
+                                    <div style="font-size: 0.75rem; color: var(--neutral-500);">Dr. Sarah Smith</div>
+                                </td>
+                                <td><span
+                                        style="font-weight: 700; font-family: monospace; font-size: 1rem;">#C-12</span>
+                                </td>
+                                <td><span class="priority-pill priority-normal">Normal</span></td>
+                                <td>
+                                    <select onchange="updatePatientVisitStatus(this)"
+                                        style="border: none; background: transparent; color: var(--warning-orange); font-weight: 600;">
+                                        <option value="waiting" selected>● Waiting</option>
+                                        <option value="consulting">● In Consultation</option>
+                                        <option value="completed">● Completed</option>
+                                    </select>
+                                </td>
+                                <td><span class="badge badge-success">ACTIVE</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm"
+                                        onclick="showHistory('John Doe')">History</button>
+                                    <button class="btn btn-outline btn-sm"
+                                        style="color: var(--danger-red); border-color: var(--danger-red);"
+                                        onclick="togglePatientAccount(this, true)">Disable</button>
+                                </td>
+                            </tr>
+                            <!-- Patient 2 -->
+                            <tr class="patient-row">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                        <div class="patient-avatar" style="background: #fee2e2; color: #dc2626;">AS
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600; color: var(--neutral-900);">Alice Stevens
+                                            </div>
+                                            <div style="font-size: 0.7rem; color: var(--neutral-500);">ID: PAT-2024-045
+                                                | 28Y, Female</div>
+                                            <div style="font-size: 0.7rem; color: var(--primary-blue);">📞 +91 99887
+                                                76655</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.85rem; font-weight: 500;">Emergency</div>
+                                    <div style="font-size: 0.75rem; color: var(--neutral-500);">Dr. Robert Fox</div>
+                                </td>
+                                <td><span
+                                        style="font-weight: 700; font-family: monospace; font-size: 1rem;">#E-04</span>
+                                </td>
+                                <td><span class="priority-pill priority-emergency">Emergency</span></td>
+                                <td>
+                                    <select onchange="updatePatientVisitStatus(this)"
+                                        style="border: none; background: transparent; color: var(--primary-blue); font-weight: 600;">
+                                        <option value="waiting">● Waiting</option>
+                                        <option value="consulting" selected>● In Consultation</option>
+                                        <option value="completed">● Completed</option>
+                                    </select>
+                                </td>
+                                <td><span class="badge badge-success">ACTIVE</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm"
+                                        onclick="showHistory('Alice Stevens')">History</button>
+                                    <button class="btn btn-outline btn-sm"
+                                        style="color: var(--danger-red); border-color: var(--danger-red);"
+                                        onclick="togglePatientAccount(this, true)">Disable</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Finance Management Section -->
+            <div id="finance-section" style="display: none;">
+                <!-- Revenue Summary Cards -->
+                <div class="dashboard-grid"
+                    style="grid-template-columns: repeat(4, 1fr); margin-bottom: var(--space-6);">
+                    <div class="revenue-stat total">
+                        <div style="font-size: 0.75rem; color: var(--neutral-500); font-weight: 600;">DAILY REVENUE
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--neutral-900);">$4,250.00</div>
+                        <div style="font-size: 0.7rem; color: var(--success-green); font-weight: 600;">↑ 8.5% vs
+                            yesterday</div>
+                    </div>
+                    <div class="revenue-stat">
+                        <div style="font-size: 0.75rem; color: var(--neutral-500); font-weight: 600;">EST. MONTHLY</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--neutral-900);">$128,400</div>
+                        <div style="font-size: 0.7rem; color: var(--neutral-400);">Based on current trend</div>
+                    </div>
+                    <div class="revenue-stat pending">
+                        <div style="font-size: 0.75rem; color: var(--neutral-500); font-weight: 600;">PENDING BILLS
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--neutral-900);">14</div>
+                        <div style="font-size: 0.7rem; color: var(--warning-orange); font-weight: 600;">$840.00 to
+                            collect</div>
+                    </div>
+                    <div class="revenue-stat total">
+                        <div style="font-size: 0.75rem; color: var(--neutral-500); font-weight: 600;">TOTAL VISITS</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--neutral-900);">184</div>
+                        <div style="font-size: 0.7rem; color: var(--neutral-500);">Successfully processed</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Billing Table -->
+                    <div class="card table-container" style="grid-column: span 3;">
+                        <div class="card-header">
+                            <h3 style="font-size: 1.1rem; margin: 0;">Recent Transactions</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-outline btn-sm">Export CSV</button>
+                                <button class="btn btn-primary btn-sm">+ Direct Billing</button>
+                            </div>
+                        </div>
+                        <table id="billing-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref / Token ID</th>
+                                    <th>Patient</th>
+                                    <th>Mode</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 600;">T-9042</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">REF: 8439201</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600;">John Doe</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">ID: PAT-2024-001
+                                        </div>
+                                    </td>
+                                    <td><span class="payment-pill pay-upi">UPI</span></td>
+                                    <td><span style="font-weight: 700;">$50.00</span></td>
+                                    <td><span class="badge badge-success">PAID</span></td>
+                                    <td><button class="btn btn-link"
+                                            style="padding: 0; font-size: 0.8rem;">Invoice</button></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 600;">T-9045</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">REF: 8439205</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600;">Alice Stevens</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">ID: PAT-2024-045
+                                        </div>
+                                    </td>
+                                    <td><span class="payment-pill pay-card">CARD</span></td>
+                                    <td><span style="font-weight: 700;">$120.00</span></td>
+                                    <td><span class="badge" style="background: #fef3c7; color: #92400e;">PENDING</span>
+                                    </td>
+                                    <td><button class="btn btn-primary btn-sm"
+                                            onclick="alert('Proceeding to payment gateway...')">Collect</button></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 600;">T-9048</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">REF: 8439208</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600;">Robert Fox</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">ID: PAT-2024-112
+                                        </div>
+                                    </td>
+                                    <td><span class="payment-pill pay-cash">CASH</span></td>
+                                    <td><span style="font-weight: 700;">$50.00</span></td>
+                                    <td><span class="badge badge-success">PAID</span></td>
+                                    <td><button class="btn btn-link"
+                                            style="padding: 0; font-size: 0.8rem;">Invoice</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Fee Configuration -->
+                    <div class="side-stats" style="grid-column: span 1;">
+                        <div class="card">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Fee Settings</h3>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem;">Default OPD Fee</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="number" class="form-control" value="50" style="padding: 6px;">
+                                        <button class="btn btn-outline" style="padding: 0 10px;">Apply</button>
+                                    </div>
+                                </div>
+                                <div
+                                    style="border-top: 1px solid var(--neutral-100); padding-top: 12px; margin-top: 4px;">
+                                    <label style="font-size: 0.75rem; font-weight: 600; color: var(--neutral-500);">DEPT
+                                        SPECIAL CHARGES</label>
+                                    <div
+                                        style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px;">
+                                        <span>Cardiology</span>
+                                        <span style="font-weight: 600;">$80.00</span>
+                                    </div>
+                                    <div
+                                        style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px;">
+                                        <span>Neurology</span>
+                                        <span style="font-weight: 600;">$100.00</span>
+                                    </div>
+                                    <div
+                                        style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px;">
+                                        <span>Surgery (OPD)</span>
+                                        <span style="font-weight: 600;">$150.00</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline"
+                                    style="width: 100%; margin-top: 10px; font-size: 0.8rem;"
+                                    onclick="alert('Opening Full Price List...')">Configure All Fees</button>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: var(--space-6);">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Daily Mode Mix</h3>
+                            <div style="display: flex; gap: 8px; flex-direction: column;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #0ea5e9;">
+                                    </div>
+                                    <span style="font-size: 0.8rem; flex: 1;">UPI Payments</span>
+                                    <span style="font-size: 0.8rem; font-weight: 600;">45%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;">
+                                    </div>
+                                    <span style="font-size: 0.8rem; flex: 1;">Cash Collection</span>
+                                    <span style="font-size: 0.8rem; font-weight: 600;">30%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #8b5cf6;">
+                                    </div>
+                                    <span style="font-size: 0.8rem; flex: 1;">Card Payments</span>
+                                    <span style="font-size: 0.8rem; font-weight: 600;">25%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Inventory Management Section -->
+                <div id="inventory-section" style="display: none;">
+                    <div class="card table-container"
+                        style="border: 2px solid var(--primary-blue-light); background: linear-gradient(to bottom, #ffffff, #f8faff);">
+                        <div class="card-header" style="flex-wrap: wrap; gap: var(--space-4);">
+                            <div>
+                                <h2 style="font-size: 1.5rem; color: var(--neutral-900);">Inventory & Supplies</h2>
+                                <p style="color: var(--neutral-500); font-size: 0.875rem;">Monitor medical stock,
+                                    equipment status, and reorder levels.</p>
+                            </div>
+                            <div style="display: flex; gap: var(--space-3); margin-left: auto;">
+                                <div style="position: relative;">
+                                    <input type="text" placeholder="Search Inventory..."
+                                        style="padding: 8px 12px 8px 36px; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); font-size: 0.875rem;">
+                                    <span
+                                        style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                                </div>
+                                <button class="btn btn-primary" onclick="alert('Adding New Item...')">+ Add
+                                    Item</button>
+                            </div>
+                        </div>
+
+                        <table id="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Details</th>
+                                    <th>Category</th>
+                                    <th>Quantity / Unit</th>
+                                    <th>Status</th>
+                                    <th>Allocation</th>
+                                    <th>Threshold</th>
+                                    <th>Supplier Info</th>
+                                    <th>Last Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Item 1 -->
+                                <tr class="inventory-row">
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--neutral-900);">Paracetamol 500mg
+                                        </div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">SKU: MED-8821</div>
+                                    </td>
+                                    <td><span class="item-category">Medicine</span></td>
+                                    <td><span style="font-weight: 700;">1,250</span> PCS</td>
+                                    <td><span class="stock-pill stock-in">In Stock</span></td>
+                                    <td>OPD Pharmacy</td>
+                                    <td><span style="color: var(--neutral-500);">Min: 500</span></td>
+                                    <td>
+                                        <div style="font-size: 0.8rem;">MediCorp Ltd.</div>
+                                        <div style="font-size: 0.7rem; color: var(--primary-blue);">+91 90000 11111
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.75rem;">Jan 30, 2026<br>14:20</div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline btn-sm"
+                                            onclick="alert('Updating Stock...')">Update</button>
+                                    </td>
+                                </tr>
+                                <!-- Item 2 -->
+                                <tr class="inventory-row">
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--neutral-900);">Surgical Gloves</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">SKU: CON-4021</div>
+                                    </td>
+                                    <td><span class="item-category">Consumables</span></td>
+                                    <td><span style="font-weight: 700; color: var(--danger-red);">120</span> PAIRS</td>
+                                    <td><span class="stock-pill stock-low">Low Stock</span></td>
+                                    <td>General Ward</td>
+                                    <td><span style="color: var(--danger-red); font-weight: 600;">Min: 200</span></td>
+                                    <td>
+                                        <div style="font-size: 0.8rem;">SafeSupply Co.</div>
+                                        <div style="font-size: 0.7rem; color: var(--primary-blue);">+91 92222 33333
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.75rem;">Jan 28, 2026<br>09:15</div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm"
+                                            onclick="alert('Ordering from Supplier...')">Reorder</button>
+                                    </td>
+                                </tr>
+                                <!-- Item 3 -->
+                                <tr class="inventory-row">
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--neutral-900);">Digital ECG Machine
+                                        </div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">SKU: EQP-1092</div>
+                                    </td>
+                                    <td><span class="item-category">Equipment</span></td>
+                                    <td><span style="font-weight: 700;">2</span> UNITS</td>
+                                    <td><span class="stock-pill stock-in">Managed</span></td>
+                                    <td>Cardiology Lab</td>
+                                    <td><span style="color: var(--neutral-500);">Min: 1</span></td>
+                                    <td>
+                                        <div style="font-size: 0.8rem;">BioTech Systems</div>
+                                        <div style="font-size: 0.7rem; color: var(--primary-blue);">+91 94444 55555
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.75rem;">Dec 12, 2025<br>16:45</div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline btn-sm"
+                                            onclick="alert('View Maintenance Log...')">Log</button>
+                                    </td>
+                                </tr>
+                                <!-- Item 4 -->
+                                <tr class="inventory-row">
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--neutral-900);">N95 Masks</div>
+                                        <div style="font-size: 0.7rem; color: var(--neutral-500);">SKU: CON-1102</div>
+                                    </td>
+                                    <td><span class="item-category">Consumables</span></td>
+                                    <td><span style="font-weight: 700; color: var(--danger-red);">0</span> PCS</td>
+                                    <td><span class="stock-pill stock-out">Out of Stock</span></td>
+                                    <td>Central Store</td>
+                                    <td><span style="color: var(--neutral-500);">Min: 100</span></td>
+                                    <td>
+                                        <div style="font-size: 0.8rem;">MediCorp Ltd.</div>
+                                        <div style="font-size: 0.7rem; color: var(--primary-blue);">+91 90000 11111
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.75rem;">Jan 25, 2026<br>11:00</div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm"
+                                            style="background: var(--danger-red); border-color: var(--danger-red);"
+                                            onclick="alert('Emergency procurement initiated...')">Procure</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+
+    <!-- Staff Modal -->
+    <div class="modal" id="staff-modal">
+        <div class="modal-header">
+            <h2 id="modal-title">Add New Staff</h2>
+            <button class="btn btn-link" onclick="closeModal()">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" class="form-control" placeholder="e.g. Dr. John Watson">
+        </div>
+        <div class="form-group">
+            <label>System Role</label>
+            <select class="form-control">
+                <option>Doctor</option>
+                <option>Nurse</option>
+                <option>Receptionist</option>
+                <option>Admin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Department / OPD</label>
+            <input type="text" class="form-control" placeholder="e.g. Cardiology">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+                <label>Shift Start</label>
+                <input type="time" class="form-control" value="09:00">
+            </div>
+            <div class="form-group">
+                <label>Shift End</label>
+                <input type="time" class="form-control" value="17:00">
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="saveStaff()">Save Profile</button>
+        </div>
+    </div>
+
+    <!-- Department Modal -->
+    <div class="modal" id="dept-modal">
+        <div class="modal-header">
+            <h2 id="dept-modal-title">Add New Department</h2>
+            <button class="btn btn-link" onclick="closeModal()">✕</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Department Name</label>
+                <input type="text" class="form-control" placeholder="e.g. Cardiology">
+            </div>
+            <div class="form-group">
+                <label>Department Code</label>
+                <input type="text" class="form-control" placeholder="e.g. CARD-001">
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>OPD Start Time</label>
+                <input type="time" class="form-control" value="09:00">
+            </div>
+            <div class="form-group">
+                <label>OPD End Time</label>
+                <input type="time" class="form-control" value="17:00">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Token / Queue Limit (Per Session)</label>
+            <input type="number" class="form-control" placeholder="e.g. 50">
+        </div>
+        <div class="form-group">
+            <label>Head Doctor / Lead</label>
+            <select class="form-control">
+                <option>Dr. Sarah Smith</option>
+                <option>Dr. Michael Brown</option>
+                <option>Dr. Emily Chen</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked> Emergency Support Enabled
+            </label>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="saveDept()">Save Department</button>
+        </div>
+    </div>
+
+    <!-- Emergency Swap Modal -->
+    <div class="modal" id="swap-modal">
+        <div class="modal-header">
+            <h2 id="swap-modal-title">Emergency Doctor Swap</h2>
+            <button class="btn btn-link" onclick="closeModal()">✕</button>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--neutral-600); margin-bottom: 20px;">Temporary reassign a doctor for
+            <span id="swap-dept-name" style="font-weight: 700;">Cardiology</span> due to emergency unavailability.
+        </p>
+
+        <div class="form-group">
+            <label>Current Doctor (Unavailable)</label>
+            <input type="text" class="form-control" value="Dr. Sarah Smith" disabled>
+        </div>
+        <div class="form-group">
+            <label>Substitute Doctor (Available Now)</label>
+            <select class="form-control">
+                <option>Dr. James Wilson (Available)</option>
+                <option>Dr. Emily Chen (Available)</option>
+                <option>Dr. Robert Fox (On Break)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Swap Duration</label>
+            <select class="form-control">
+                <option>Next 2 Hours</option>
+                <option>Full Session</option>
+                <option>Until Manual Revert</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary"
+                style="flex: 1; background: var(--danger-red); border-color: var(--danger-red);"
+                onclick="confirmSwap()">Confirm Swap</button>
+        </div>
+    </div>
+
+    <!-- Patient History Modal -->
+    <div class="modal" id="history-modal">
+        <div class="modal-header">
+            <h2 id="history-modal-title">Patient Visit History</h2>
+            <button class="btn btn-link" onclick="closeModal()">✕</button>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <div style="font-weight: 600; font-size: 1.1rem;" id="history-patient-name">John Doe</div>
+            <div style="color: var(--neutral-500); font-size: 0.85rem;">Last visit was 12 days ago.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div
+                style="padding: 12px; border: 1px solid var(--neutral-100); border-radius: var(--radius-md); background: #fcfcfc;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Jan 18, 2026 - Cardiology</span>
+                    <span style="font-size: 0.75rem; color: var(--success-green); font-weight: 700;">COMPLETED</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--neutral-700);">Consulted with <b>Dr. Sarah Smith</b>
+                    regarding mild chest pain. Vital signs stable. Blood tests recommended.</div>
+            </div>
+            <div
+                style="padding: 12px; border: 1px solid var(--neutral-100); border-radius: var(--radius-md); background: #fcfcfc;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Nov 05, 2025 - General Checkup</span>
+                    <span style="font-size: 0.75rem; color: var(--neutral-400); font-weight: 700;">ARCHIVED</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--neutral-700);">Routine annual wellness check. Weight: 74kg,
+                    BP: 120/80. No issues reported.</div>
+            </div>
+        </div>
+        <div style="margin-top: 25px;">
+            <button class="btn btn-primary" style="width: 100%;" onclick="closeModal()">Close Records</button>
+        </div>
+    </div>
+
+    <script>
+        function showSection(section) {
+            const overview = document.getElementById('overview-section');
+            const staff = document.getElementById('staff-section');
+            const depts = document.getElementById('departments-section');
+            const patients = document.getElementById('patients-section');
+            const finance = document.getElementById('finance-section');
+            const inventory = document.getElementById('inventory-section');
+            const navItems = document.querySelectorAll('.nav-item');
+            const title = document.getElementById('page-title');
+            const desc = document.getElementById('page-desc');
+
+            navItems.forEach(i => i.classList.remove('active'));
+
+            // Reset all displays
+            overview.style.display = 'none';
+            staff.style.display = 'none';
+            depts.style.display = 'none';
+            patients.style.display = 'none';
+            finance.style.display = 'none';
+            inventory.style.display = 'none';
+
+            if (section === 'departments') {
+                depts.style.display = 'block';
+                navItems[1].classList.add('active');
+                title.innerText = "Department Management";
+                desc.innerText = "Configure OPD slots, emergency swaps, and department status.";
+            } else if (section === 'staff') {
+                staff.style.display = 'block';
+                navItems[2].classList.add('active');
+                title.innerText = "Staff Management";
+                desc.innerText = "Control personnel roles, assignments, and availability.";
+            } else if (section === 'patients') {
+                patients.style.display = 'block';
+                navItems[3].classList.add('active');
+                title.innerText = "Patient Management";
+                desc.innerText = "Monitor active visits, medical history, and registration records.";
+            } else if (section === 'finance') {
+                finance.style.display = 'block';
+                navItems[4].classList.add('active');
+                title.innerText = "Finance Management";
+                desc.innerText = "Track hospital revenue, billing records, and fee configurations.";
+            } else if (section === 'inventory') {
+                inventory.style.display = 'block';
+                navItems[5].classList.add('active');
+                title.innerText = "Inventory Management";
+                desc.innerText = "Manage hospital supplies, medicine stock, and equipment.";
+            } else {
+                overview.style.display = 'block';
+                navItems[0].classList.add('active');
+                title.innerText = "Hospital Overview";
+                desc.innerText = "Real-time insights and performance metrics.";
+            }
+        }
+
+        function filterStaff(element, role) {
+            const tags = document.querySelectorAll('.filter-tag');
+            const rows = document.querySelectorAll('.staff-row');
+            tags.forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            rows.forEach(r => {
+                if (role === 'all' || r.classList.contains(role)) r.style.display = 'table-row';
+                else r.style.display = 'none';
+            });
+        }
+
+        function updateRowStatus(select) {
+            const row = select.closest('tr');
+            const doctorName = row.querySelector('td span').innerText;
+            const status = select.value === 'available' ? 'Available' : (select.value === 'duty' ? 'On Duty' : 'Off Duty');
+
+            if (select.value === 'available') select.style.color = 'var(--success-green)';
+            else if (select.value === 'duty') select.style.color = 'var(--warning-orange)';
+            else select.style.color = 'var(--neutral-400)';
+
+            // Trigger notification for patients
+            const notifications = JSON.parse(localStorage.getItem('smartcare_notifications') || '[]');
+            notifications.unshift({
+                id: Date.now(),
+                doctor: doctorName,
+                status: status,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: 'Today'
+            });
+            localStorage.setItem('smartcare_notifications', JSON.stringify(notifications.slice(0, 10)));
+
+            alert(`Status for ${doctorName} updated to ${status}. Notification sent to patients.`);
+        }
+
+        function toggleAccount(btn, suspend) {
+            const row = btn.closest('tr');
+            const badge = row.querySelector('.badge');
+            if (suspend) {
+                if (confirm('Suspend this staff member?')) {
+                    badge.innerText = 'INACTIVE';
+                    badge.style.background = '#e2e8f0';
+                    badge.style.color = '#64748b';
+                    btn.innerText = 'Activate';
+                    btn.style.color = 'var(--success-green)';
+                    btn.style.borderColor = 'var(--success-green)';
+                    btn.onclick = () => toggleAccount(btn, false);
+                }
+            } else {
+                badge.innerText = 'ACTIVE';
+                badge.className = 'badge badge-success';
+                btn.innerText = 'Suspend';
+                btn.style.color = 'var(--danger-red)';
+                btn.style.borderColor = 'var(--danger-red)';
+                btn.onclick = () => toggleAccount(btn, true);
+            }
+        }
+
+        // Department Controls
+        function toggleDeptStatus(btn, disable) {
+            const row = btn.closest('tr');
+            const badge = row.querySelector('.badge');
+            if (disable) {
+                if (confirm('Disable this department? No new tokens will be issued.')) {
+                    badge.innerText = 'DISABLED';
+                    badge.className = 'badge';
+                    badge.style.background = '#fecaca';
+                    badge.style.color = 'var(--danger-red)';
+                    btn.innerText = 'Enable';
+                    btn.style.color = 'var(--success-green)';
+                    btn.style.borderColor = 'var(--success-green)';
+                    btn.onclick = () => toggleDeptStatus(btn, false);
+                }
+            } else {
+                badge.innerText = 'ACTIVE';
+                badge.className = 'badge badge-success';
+                btn.innerText = 'Disable';
+                btn.style.color = 'var(--danger-red)';
+                btn.style.borderColor = 'var(--danger-red)';
+                btn.onclick = () => toggleDeptStatus(btn, true);
+            }
+        }
+
+        function toggleEmergency(checkbox, dept) {
+            alert(`Emergency support for ${dept} is now ${checkbox.checked ? 'ENABLED' : 'DISABLED'}.`);
+        }
+
+        function showAddDeptModal() {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('dept-modal').style.display = 'block';
+            document.getElementById('dept-modal-title').innerText = 'Create New Department';
+        }
+
+        function showEmergencySwapModal(dept) {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('swap-modal').style.display = 'block';
+            document.getElementById('swap-dept-name').innerText = dept;
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function confirmSwap() {
+            alert('Emergency doctor swap successful. Hospital records updated.');
+            closeModal();
+        }
+
+        function saveDept() {
+            alert('Department configuration saved.');
+            closeModal();
+        }
+
+        function showAddStaffModal() {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('staff-modal').style.display = 'block';
+        }
+
+        function saveStaff() {
+            alert('Staff profile saved.');
+            closeModal();
+        }
+
+        function logout() {
+            if (confirm('Logout of system?')) {
+                localStorage.removeItem('smartcare_user_email');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Patient Specific Logic
+        function updatePatientVisitStatus(select) {
+            const val = select.value;
+            if (val === 'waiting') select.style.color = 'var(--warning-orange)';
+            else if (val === 'consulting') select.style.color = 'var(--primary-blue)';
+            else select.style.color = 'var(--success-green)';
+        }
+
+        function togglePatientAccount(btn, suspend) {
+            const row = btn.closest('tr');
+            const badge = row.querySelector('.badge');
+            if (suspend) {
+                if (confirm('Deactivate this patient record? They will not be able to book new tokens.')) {
+                    badge.innerText = 'INACTIVE';
+                    badge.style.background = '#e2e8f0';
+                    badge.style.color = '#64748b';
+                    btn.innerText = 'Activate';
+                    btn.style.color = 'var(--success-green)';
+                    btn.style.borderColor = 'var(--success-green)';
+                    btn.onclick = () => togglePatientAccount(btn, false);
+                }
+            } else {
+                badge.innerText = 'ACTIVE';
+                badge.className = 'badge badge-success';
+                btn.innerText = 'Disable';
+                btn.style.color = 'var(--danger-red)';
+                btn.style.borderColor = 'var(--danger-red)';
+                btn.onclick = () => togglePatientAccount(btn, true);
+            }
+        }
+
+        function showHistory(name) {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('history-modal').style.display = 'block';
+            document.getElementById('history-patient-name').innerText = name;
+        }
+
+        window.onload = () => {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(b => {
+                const h = b.style.height;
+                b.style.height = '0';
+                setTimeout(() => b.style.height = h, 400);
+            });
+        };
+    </script>
+</body>
+
+</html>

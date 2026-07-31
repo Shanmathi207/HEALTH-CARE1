@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Care | Digital OPD Token</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: var(--neutral-50);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .token-container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Hospital Header */
+        .hospital-header {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hospital-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .hospital-subtext {
+            font-size: var(--text-xs);
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* Token Body */
+        .token-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .department-badge {
+            display: inline-block;
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .token-number-label {
+            font-size: var(--text-sm);
+            color: var(--neutral-500);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .token-number {
+            font-size: 4.5rem;
+            font-weight: 800;
+            font-family: var(--font-display);
+            color: var(--neutral-900);
+            line-height: 1;
+            margin: 0.5rem 0 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        /* Status Pill */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .status-waiting {
+            background: #eff6ff;
+            color: var(--primary-blue);
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            text-align: left;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--neutral-50);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--neutral-900);
+        }
+
+        /* QR Code Section */
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px dashed var(--neutral-200);
+        }
+
+        .qr-box {
+            width: 120px;
+            height: 120px;
+            background: white;
+            padding: 0.5rem;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+        }
+
+        .qr-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .scan-text {
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+        }
+
+        /* Action Buttons */
+        .actions-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-track {
+            background: var(--primary-blue);
+            color: white;
+            width: 100%;
+            justify-content: center;
+            padding: 1rem;
+            font-size: var(--text-base);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-track:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--neutral-500);
+            border: 1px solid var(--neutral-200);
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .btn-cancel:hover {
+            color: var(--danger-red);
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        /* Footer Note */
+        .token-footer {
+            margin-top: 1.5rem;
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            line-height: 1.5;
+        }
+
+        /* Validity Banner */
+        .validity-banner {
+            background: #f0fdf4;
+            color: #15803d;
+            font-size: var(--text-xs);
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #dcfce7;
+            font-weight: 500;
+        }
+
+        /* Emergency Flag (Hidden by default) */
+        .priority-flag {
+            position: absolute;
+            top: 1rem;
+            right: -2rem;
+            background: var(--danger-red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 2rem;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .priority-active .priority-flag {
+            display: block;
+        }
+
+        .priority-active .status-pill {
+            background: #fef2f2;
+            color: var(--danger-red);
+            border-color: #fecaca;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="token-container" id="token-card">
+        <!-- Priority Flag -->
+        <div class="priority-flag">URGENT</div>
+
+        <!-- Hospital Header -->
+        <div class="hospital-header">
+            <div class="hospital-logo">
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="white" />
+                    <path d="M16 8L16 24M8 16L24 16" stroke="#2563eb" stroke-width="3" stroke-linecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="#2563eb" />
+                </svg>
+                Smart Care Health
+            </div>
+            <div class="hospital-subtext">City General Hospital • OPD Center</div>
+        </div>
+
+        <!-- Validity Banner -->
+        <div class="validity-banner">
+            Valid for Today Only • <span id="current-date">Jan 30, 2026</span>
+        </div>
+
+        <!-- Token Body -->
+        <div class="token-body">
+            <span class="department-badge">Cardiology Dept.</span>
+
+            <div class="token-number-label">Your Token Number</div>
+            <div class="token-number">A-12</div>
+
+            <div class="status-pill status-waiting">
+                <span class="status-dot"></span>
+                <span>In Queue (Waiting)</span>
+            </div>
+
+            <!-- Details Grid -->
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Patient</span>
+                    <span class="detail-value">J. Doe (PID: #942)</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Doctor</span>
+                    <span class="detail-value">Dr. S. Mitchell</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Generated At</span>
+                    <span class="detail-value" id="gen-time">09:45 AM</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Est. Wait</span>
+                    <span class="detail-value" style="color:var(--primary-blue)">32 mins</span>
+                </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="qr-section">
+                <div class="qr-box">
+                    <!-- Placeholder QR (using a public API or just a div) -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SmartCare-Token-A12-PID942"
+                        alt="Token QR Code">
+                </div>
+                <span class="scan-text">Scan at reception for check-in</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions-stack">
+                <button class="btn btn-primary btn-track" onclick="window.location.href='waiting-time.html'">
+                    Track Queue Live
+                </button>
+                <button class="btn btn-secondary btn-cancel" onclick="cancelToken()">
+                    Cancel / Skip Token
+                </button>
+            </div>
+
+            <!-- Note Footer -->
+            <div class="token-footer">
+                <strong>Note:</strong> Please arrive 10 minutes before your estimated time. If you miss your call, you
+                may need to generate a new token.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+// Force fresh token generation, even on back-button navigation
+// (browsers can restore a cached page without re-running scripts)
+// ---------------------------------------------------------
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+// Set dynamic date
+const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+const today = new Date();
+document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', options);
+
+// Set generation time
+const genTime = new Date();
+document.getElementById('gen-time').textContent = genTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+// ---------------------------------------------------------
+// Load the doctor selected on the previous page
+// ---------------------------------------------------------
+const selectedDoctorRaw = localStorage.getItem('selectedDoctor');
+
+// Stronger randomness: combine Math.random with current timestamp
+const randomSeed = Math.floor((Math.random() * Date.now()) % 90) + 10;
+let tokenNumber = 'A-' + randomSeed;
+let queuePosition = Math.floor(Math.random() * 8) + 1;
+let waitMinutes = queuePosition * 5;
+
+if (selectedDoctorRaw) {
+    const doc = JSON.parse(selectedDoctorRaw);
+
+    document.querySelector('.hospital-subtext').textContent = `${doc.hospital} • OPD Center`;
+
+    const specialist = localStorage.getItem('suggestedSpecialist') || 'General OPD';
+    document.querySelector('.department-badge').textContent = `${specialist} Dept.`;
+
+    const doctorDetailValue = document.querySelectorAll('.detail-value')[1];
+    if (doctorDetailValue) doctorDetailValue.textContent = doc.doctor;
+
+    const patientName = localStorage.getItem('smartcare_user_name') || 'Patient';
+    const patientDetailValue = document.querySelectorAll('.detail-value')[0];
+    if (patientDetailValue) patientDetailValue.textContent = `${patientName} (PID: #${Math.floor(Math.random()*900+100)})`;
+
+    const waitDetailValue = document.querySelectorAll('.detail-value')[3];
+    if (waitDetailValue) waitDetailValue.textContent = `${waitMinutes} mins`;
+}
+
+document.querySelector('.token-number').textContent = tokenNumber;
+
+const qrImg = document.querySelector('.qr-box img');
+if (qrImg) {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SmartCare-Token-${tokenNumber}`;
+}
+
+localStorage.setItem('currentToken', JSON.stringify({
+    tokenNumber,
+    queuePosition,
+    waitMinutes,
+    doctor: selectedDoctorRaw ? JSON.parse(selectedDoctorRaw) : null,
+    generatedAt: genTime.toISOString()
+}));
+
+function cancelToken() {
+    if (confirm("Are you sure you want to cancel your appointment token? This action cannot be undone.")) {
+        alert(`Token ${tokenNumber} has been cancelled.`);
+        localStorage.removeItem('currentToken');
+        window.location.href = 'patient-home.html';
+    }
+}
+
+window.togglePriority = function () {
+    document.getElementById('token-card').classList.toggle('priority-active');
+}
+    </script>
+</body>
+
+</html>

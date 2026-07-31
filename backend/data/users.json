@@ -1,0 +1,32 @@
+[
+  {
+    "email": "patient@demo.com",
+    "password": "$2b$10$7HicVTnGjC3e4zfCprMPoukcXcfIr9UlXuWrplAg0tbZcuneUaLZa",
+    "userType": "patient",
+    "name": "Demo Patient",
+    "phone": "0000000000",
+    "createdAt": "2026-07-21T17:35:05.869Z",
+    "_id": "1784655305869-1e799fdb41e708"
+  },
+  {
+    "email": "doctor@demo.com",
+    "password": "$2b$10$Fxj1J7IkxGVIOyvr8HCmaeq9V1uYARgqEeNhTFHhyJwvZ75XrHWZi",
+    "userType": "doctor",
+    "name": "Demo Doctor",
+    "phone": "0000000001",
+    "specialization": "General Medicine",
+    "department": "Cardiology",
+    "createdAt": "2026-07-21T17:35:05.939Z",
+    "_id": "1784655305939-8050abfcb9a59"
+  },
+  {
+    "email": "admin@demo.com",
+    "password": "$2b$10$n3hZo8wViOKLc9YFSCwPtOray3QIZ.Pl1.T5INQNHFWGz1KFPrKL2",
+    "userType": "hospital",
+    "name": "Demo Admin",
+    "phone": "0000000002",
+    "hospitalName": "City General Hospital",
+    "createdAt": "2026-07-21T17:35:06.004Z",
+    "_id": "1784655306004-65a28bf717e1c8"
+  }
+]

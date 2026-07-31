@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Care | Symptom Analysis Core</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: var(--neutral-50);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Override */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neutral-200);
+            z-index: 1000;
+        }
+
+        .main-interface {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 1.5rem;
+            padding: 2rem 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 80px);
+            /* Full height - navbar */
+        }
+
+        /* Left Column: AI Visuals */
+        .ai-visual-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-card {
+            background: var(--white);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .ai-status-container {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .thinking-orb {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .thinking-orb::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-blue);
+            opacity: 0.5;
+            animation: pulse-ring 2s infinite;
+        }
+
+        .ai-status-text {
+            font-size: var(--text-sm);
+            color: var(--neutral-600);
+            font-weight: 500;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .metric-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .metric-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-track {
+            height: 6px;
+            background: var(--neutral-100);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Middle Column: Chat */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+        }
+
+        .chat-history {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+            line-height: 1.6;
+        }
+
+        .system-message {
+            align-self: flex-start;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .bot-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--neutral-100);
+            color: var(--primary-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 0 16px 16px 16px;
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-100);
+            color: var(--neutral-800);
+            font-size: var(--text-base);
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .user-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 16px 16px 0 16px;
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .input-area {
+            padding: 1.5rem;
+            border-top: 1px solid var(--neutral-200);
+            background: var(--white);
+        }
+
+        .typing-indicator {
+            padding-left: 3.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .typing-indicator.active {
+            opacity: 1;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neutral-400);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .send-btn {
+            width: 50px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-blue-dark);
+        }
+
+        /* Right Column: Insights */
+        .insights-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .insight-card {
+            background: var(--white);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .risk-gauge {
+            height: 100px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .gauge-arch {
+            width: 160px;
+            height: 80px;
+            background: conic-gradient(from 180deg at 50% 100%,
+                    #10b981 0deg 60deg,
+                    #f59e0b 60deg 120deg,
+                    #ef4444 120deg 180deg);
+            border-radius: 160px 160px 0 0;
+            mask: radial-gradient(circle at 50% 100%, transparent 60%, black 61%);
+            -webkit-mask: radial-gradient(circle at 50% 100%, transparent 60%, black 61%);
+        }
+
+        .gauge-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            height: 70px;
+            background: var(--neutral-800);
+            transform-origin: bottom center;
+            transform: rotate(-90deg);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .risk-text {
+            text-align: center;
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin-top: 0.5rem;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: var(--text-sm);
+            border: 1px solid var(--neutral-200);
+        }
+
+        /* Modal Redesign */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-card {
+            background: var(--white);
+            width: 600px;
+            max-width: 90%;
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-2xl);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            font-family: var(--font-display);
+        }
+
+        .triage-badge {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: var(--text-sm);
+        }
+
+        .triage-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .report-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-heading {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .condition-list {
+            list-style: none;
+        }
+
+        .condition-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--neutral-50);
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-interface {
+                grid-template-columns: 1fr;
+                height: auto;
+                padding-bottom: 4rem;
+            }
+
+            .chat-container {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
+                    <path d="M16 8L16 24M8 16L24 16" stroke="white" stroke-width="3" stroke-linecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="white" />
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                            <stop offset="0%" stop-color="#2563eb" />
+                            <stop offset="100%" stop-color="#1e40af" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">Smart Care</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span
+                    style="font-size: 0.8rem; color: var(--success-green); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 8px; height: 8px; background: currentColor; border-radius: 50%;"></span>
+                    SYSTEM ACTIVE
+                </span>
+                <button class="btn btn-outline" onclick="window.location.href='index.html'">Exit Analysis</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-interface">
+        <!-- Left: Status Panel -->
+        <section class="ai-visual-col">
+            <div class="ai-status-container">
+                <div class="thinking-orb"></div>
+                <div class="ai-status-text">Analysing Biomarkers...</div>
+            </div>
+
+            <div class="panel-card">
+                <div class="metric-item">
+                    <div class="metric-label">
+                        <span>Confidence Score</span>
+                        <span class="metric-value">0%</span>
+                    </div>
+                    <div class="metric-track">
+                        <div class="metric-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">
+                        <span>Analysis Depth</span>
+                        <span>Level 1</span>
+                    </div>
+                    <div class="metric-track">
+                        <div class="metric-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center: Chat Interface -->
+        <section class="chat-container">
+            <div class="chat-history" id="chat-history">
+                <div class="message system-message">
+                    <div class="bot-avatar">AI</div>
+                    <div class="message-bubble">
+                        Hello. I am Smart Care AI. I'm here to analyze your symptoms and guide you to the right care.
+                        <br><br>
+                        Please describe your main symptom in your own words.
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="typing-indicator" id="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" id="user-input" class="chat-input"
+                        placeholder="e.g., severe headache with light sensitivity..." autocomplete="off">
+                    <button id="send-btn" class="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Live Insights -->
+        <section class="insights-col">
+            <div class="insight-card hidden" id="risk-card">
+                <div class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    Real-time Risk Estimator
+                </div>
+                <div class="risk-gauge">
+                    <div class="gauge-arch"></div>
+                    <div class="gauge-needle" id="risk-indicator"></div>
+                </div>
+                <div class="risk-text" id="risk-label">Awaiting Data</div>
+            </div>
+
+            <div class="insight-card hidden" id="symptom-list-card">
+                <div class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Detected Symptoms
+                </div>
+                <div class="tags-container" id="symptom-tags">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 class="modal-title">Analysis Complete</h2>
+                <div class="triage-badge triage-moderate" id="final-triage-badge">MODERATE</div>
+            </div>
+            <div class="modal-body">
+                <div class="report-section">
+                    <div class="section-heading">Potential Conditions</div>
+                    <ul class="condition-list" id="conditions-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <div class="report-section">
+                    <div class="section-heading">Recommended Action</div>
+                    <div id="recommendation-text" style="font-size: var(--text-base); color: var(--neutral-800);">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="report-section">
+                    <div class="section-heading">Suggested Specialist</div>
+                    <div id="specialist-card"
+                        style="background: #eff6ff; padding: 1rem; border-radius: var(--radius-lg); border: 1px solid #bfdbfe; color: var(--primary-blue-dark); font-weight: 600;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="location.reload()">New Analysis</button>
+                <button class="btn btn-primary" id="book-token-btn">Book Digital Token</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="analysis.js"></script>
+</body>
+
+</html>

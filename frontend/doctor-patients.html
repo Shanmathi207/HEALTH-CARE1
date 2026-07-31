@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Care Doctor Dashboard - My Patients">
+    <title>My Patients - Smart Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Dashboard Specific Styles */
+        body {
+            background-color: var(--neutral-50);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--neutral-200);
+            padding: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+        }
+
+        .sidebar-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--neutral-600);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: var(--neutral-100);
+            color: var(--neutral-900);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Queue Panel */
+        .queue-panel {
+            background: var(--white);
+            border-right: 1px solid var(--neutral-200);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .queue-controls {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+        }
+
+        .search-bar {
+            padding: var(--space-3);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            width: 100%;
+            font-family: var(--font-primary);
+            margin-top: var(--space-3);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .filter-tab {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-tab.active {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .patient-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .patient-card {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .patient-card:hover {
+            background-color: var(--neutral-50);
+        }
+
+        .patient-card.active {
+            background-color: rgba(37, 99, 235, 0.05);
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .patient-card.serving {
+            background-color: rgba(16, 185, 129, 0.05);
+            border-left: 3px solid var(--success-green);
+        }
+
+        .patient-card.emergency {
+            background-color: rgba(239, 68, 68, 0.05);
+            border-left: 3px solid var(--danger-red);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-2);
+        }
+
+        .token-badge {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--neutral-900);
+            background: var(--neutral-100);
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+        }
+
+        .status-pill {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-waiting {
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+        }
+
+        .status-serving {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-completed {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .status-skipped {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .time-badge {
+            font-size: 0.75rem;
+            color: var(--neutral-500);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            padding: var(--space-8);
+            overflow-y: auto;
+            background: var(--neutral-50);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-6);
+        }
+
+        .patient-identity h2 {
+            font-size: 2rem;
+            margin-bottom: var(--space-1);
+        }
+
+        .patient-meta {
+            display: flex;
+            gap: var(--space-4);
+            color: var(--neutral-500);
+            font-size: 0.9rem;
+        }
+
+        .risk-banner {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--danger-red);
+        }
+
+        .risk-medium {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            color: var(--warning-orange);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success-green);
+        }
+
+        .ai-summary {
+            background: var(--white);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--neutral-200);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .keyword-tags {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            margin-top: var(--space-3);
+        }
+
+        .keyword {
+            background: var(--neutral-100);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            color: var(--neutral-700);
+        }
+
+        .keyword.emergency {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+            font-weight: 600;
+        }
+
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 680px;
+            /* Sidebar + Queue Panel */
+            padding: var(--space-4) var(--space-8);
+            background: var(--white);
+            border-top: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .primary-actions {
+            display: flex;
+            gap: var(--space-4);
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+
+            .action-bar {
+                left: 630px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 80px 1fr;
+            }
+
+            .sidebar {
+                padding: var(--space-4);
+                align-items: center;
+            }
+
+            .sidebar h3,
+            .nav-item span:last-child {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: var(--space-3);
+            }
+
+            .main-content {
+                grid-template-columns: 300px 1fr;
+            }
+
+            .action-bar {
+                left: 380px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"></div>
+                <h3>Smart Care</h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='doctor-home.html'">
+                    <span>🏠</span> <span>Dashboard</span>
+                </div>
+                <div class="nav-item active" onclick="window.location.href='doctor-patients.html'">
+                    <span>👥</span> <span>My Patients</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='doctor-schedule.html'">
+                    <span>📅</span> <span>Schedule</span>
+                </div>
+
+                <div class="nav-item">
+                    <span>💬</span> Messages
+                </div>
+                <div class="nav-item">
+                    <span>⚙️</span> <span>Settings</span>
+                </div>
+                <div class="nav-item" style="margin-top: auto; color: var(--danger-red);" onclick="logout()">
+                    <span>🚪</span> <span>Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <!-- Queue List Panel -->
+            <div class="queue-panel">
+                <div class="panel-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="font-size: 1.25rem; margin: 0;">Patient Queue</h2>
+                        <div class="status-pill status-serving" style="display: flex; align-items: center; gap: 4px;">
+                            <span style="width: 6px; height: 6px; background: currentColor; border-radius: 50%;"></span>
+                            LIVE
+                        </div>
+                    </div>
+
+                    <div class="queue-controls">
+                        <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="toggleQueueState(this)">
+                            ⏸️ Pause Queue
+                        </button>
+                        <button class="btn btn-outline btn-sm" style="flex: 1;">
+                            ⏱️ +5m Delay
+                        </button>
+                    </div>
+
+                    <input type="text" class="search-bar" placeholder="Search token, name...">
+
+                    <div class="filter-tabs">
+                        <div class="filter-tab active">All</div>
+                        <div class="filter-tab">Waiting</div>
+                        <div class="filter-tab">Emergency</div>
+                        <div class="filter-tab">Done</div>
+                    </div>
+                </div>
+
+                <div class="patient-list">
+                    <!-- Serving Now -->
+                    <div class="patient-card serving active" onclick="selectPatient(1)">
+                        <div class="card-top">
+                            <span class="token-badge">#42</span>
+                            <span class="status-pill status-serving">Serving Now</span>
+                        </div>
+                        <h4 style="margin-bottom: 4px;">John Doe</h4>
+                        <div style="font-size: 0.85rem; color: var(--neutral-600);">Fever, High Temperature</div>
+                        <div
+                            style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span class="status-pill"
+                                style="background: rgba(239, 68, 68, 0.1); color: var(--danger-red);">High Risk</span>
+                            <span class="time-badge">⏱️ 00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Next Patients -->
+                    <div class="patient-card" onclick="selectPatient(2)">
+                        <div class="card-top">
+                            <span class="token-badge">#43</span>
+                            <span class="status-pill status-waiting">Waiting</span>
+                        </div>
+                        <h4 style="margin-bottom: 4px;">Jane Smith</h4>
+                        <div style="font-size: 0.85rem; color: var(--neutral-600);">General Checkup, Fatigue</div>
+                        <div
+                            style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span class="status-pill"
+                                style="background: rgba(16, 185, 129, 0.1); color: var(--success-green);">Low
+                                Risk</span>
+                            <span class="time-badge">Est. 15m</span>
+                        </div>
+                    </div>
+
+                    <div class="patient-card emergency" onclick="selectPatient(3)">
+                        <div class="card-top">
+                            <span class="token-badge">#44</span>
+                            <span class="status-pill status-waiting">Emergency</span>
+                        </div>
+                        <h4 style="margin-bottom: 4px;">Michael Brown</h4>
+                        <div style="font-size: 0.85rem; color: var(--neutral-600);">Chest Pain, Shortness of Breath
+                        </div>
+                        <div
+                            style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span class="status-pill"
+                                style="background: rgba(239, 68, 68, 0.1); color: var(--danger-red);">Critical</span>
+                            <span class="time-badge">Priority</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="padding: 12px; border-top: 1px solid var(--neutral-200); font-size: 0.75rem; color: var(--neutral-500); text-align: center;">
+                    Last updated: Just now
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="patient-identity">
+                        <div class="token-badge" style="display: inline-block; margin-bottom: 8px; font-size: 1.25rem;">
+                            Token #42</div>
+                        <h2>John Doe</h2>
+                        <div class="patient-meta">
+                            <span>Male, 45 Years</span>
+                            <span>•</span>
+                            <span>ID: P-98234</span>
+                            <span>•</span>
+                            <span>General OPD</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline">📜 History</button>
+                </div>
+
+                <!-- Risk Assessment -->
+                <div class="risk-banner risk-high">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <span style="font-size: 1.5rem;">⚠️</span>
+                        <div>
+                            <h4 style="margin: 0; color: inherit;">High Risk Detected</h4>
+                            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Symptoms suggest potential infection
+                                requiring immediate attention.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="timer"
+                    style="font-family: var(--font-display); font-weight: 600; color: var(--neutral-600);">
+                    Consultation Time: <span style="color: var(--primary-blue);">04:23</span>
+                </div>
+                <div class="primary-actions">
+                    <button class="btn btn-outline"
+                        style="color: var(--warning-orange); border-color: var(--warning-orange);">Skip</button>
+                    <button class="btn btn-outline">Refer</button>
+                    <button class="btn btn-primary" onclick="completePatient()">✅ Mark Completed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('smartcare_user_email');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function toggleQueueState(btn) {
+            if (btn.innerText.includes('Pause')) {
+                btn.innerText = '▶️ Resume Queue';
+                btn.style.borderColor = 'var(--success-green)';
+                btn.style.color = 'var(--success-green)';
+            } else {
+                btn.innerText = '⏸️ Pause Queue';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }
+        }
+
+        function completePatient() {
+            if (confirm('Mark patient #42 as completed and call next?')) {
+                // Animation logic would go here
+                alert('Patient #42 Completed. Calling #43...');
+                location.reload(); // Refresh to simulate next state
+            }
+        }
+
+        function selectPatient(id) {
+            // Logic to highlight selected patient and update details
+            document.querySelectorAll('.patient-card').forEach(c => c.classList.remove('active'));
+            // In a real app, we'd target the specific element better
+        }
+    </script>
+</body>
+
+</html>

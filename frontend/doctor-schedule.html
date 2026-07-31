@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Care Doctor Schedule Management">
+    <title>Schedule & Availability - Smart Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Dashboard Specific Styles */
+        body {
+            background-color: var(--neutral-50);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--neutral-200);
+            padding: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+        }
+
+        .sidebar-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--neutral-600);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: var(--neutral-100);
+            color: var(--neutral-900);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: var(--space-8);
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: var(--space-8);
+        }
+
+        .page-header {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* Status Controls Panel */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        .status-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .availability-switch {
+            display: flex;
+            background: var(--neutral-100);
+            padding: 4px;
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+        }
+
+        .switch-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--neutral-600);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .switch-option.active {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .switch-option[data-status="available"].active {
+            background: var(--white);
+            color: var(--success-green);
+        }
+
+        .switch-option[data-status="break"].active {
+            background: var(--white);
+            color: var(--warning-orange);
+        }
+
+        .switch-option[data-status="unavailable"].active {
+            background: var(--white);
+            color: var(--danger-red);
+        }
+
+        /* Schedule Timeline */
+        .schedule-view {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--neutral-200);
+            margin-top: var(--space-6);
+        }
+
+        .timeline-event {
+            position: relative;
+            margin-bottom: var(--space-8);
+        }
+
+        .timeline-event::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .event-time {
+            font-size: 0.9rem;
+            color: var(--neutral-500);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .event-card {
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+        }
+
+        .event-title {
+            font-weight: 600;
+            color: var(--neutral-900);
+            margin-bottom: 4px;
+        }
+
+        .event-details {
+            font-size: 0.85rem;
+            color: var(--neutral-600);
+        }
+
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--neutral-700);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-family: var(--font-primary);
+            font-size: 0.95rem;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            float: right;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--neutral-300);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-blue);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .delay-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-2xl);
+            z-index: 100;
+            width: 400px;
+            max-width: 90%;
+            border: 1px solid var(--neutral-200);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 80px 1fr;
+            }
+
+            .sidebar {
+                padding: var(--space-4);
+                align-items: center;
+            }
+
+            .sidebar h3,
+            .nav-item span:last-child {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: var(--space-3);
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"></div>
+                <h3>Smart Care</h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.location.href='doctor-home.html'">
+                    <span>🏠</span> <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='doctor-patients.html'">
+                    <span>👥</span> <span>My Patients</span>
+                </div>
+                <div class="nav-item active" onclick="window.location.href='doctor-schedule.html'">
+                    <span>📅</span> <span>Schedule</span>
+                </div>
+
+                <div class="nav-item">
+                    <span>💬</span> Messages
+                </div>
+                <div class="nav-item">
+                    <span>⚙️</span> <span>Settings</span>
+                </div>
+                <div class="nav-item" style="margin-top: auto; color: var(--danger-red);" onclick="logout()">
+                    <span>🚪</span> <span>Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 style="margin-bottom: 0.5rem; font-size: 1.75rem;">Schedule & Availability</h1>
+                    <p style="color: var(--neutral-500); margin: 0;">Manage your OPD timings and patient flow.</p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="status-badge" id="schedule-status-badge">
+                        <div class="status-dot"></div>
+                        OPD Running
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--neutral-400); margin-top: 6px;">Last updated: Just now
+                    </div>
+                </div>
+            </div>
+
+            <!-- Left Control Panel -->
+            <div class="control-panel">
+                <!-- Status Card -->
+                <div class="status-card">
+                    <h3 style="font-size: 1.1rem; margin-bottom: var(--space-2);">Current Status</h3>
+                    <div class="availability-switch">
+                        <div class="switch-option active" data-status="available" onclick="setStatus('available')">
+                            Available</div>
+                        <div class="switch-option" data-status="break" onclick="setStatus('break')">On Break</div>
+                        <div class="switch-option" data-status="unavailable" onclick="setStatus('unavailable')">
+                            Unavailable</div>
+                    </div>
+                </div>
+
+                <!-- Queue Settings -->
+                <div class="status-card">
+                    <h3 style="font-size: 1.1rem; margin-bottom: var(--space-4);">Queue Configuration</h3>
+
+                    <div class="input-group">
+                        <label>Max Token Limit</label>
+                        <input type="number" class="input-field" value="50">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Avg. Consultation Time (mins)</label>
+                        <input type="number" class="input-field" value="15">
+                        <div style="font-size: 0.75rem; color: var(--neutral-500); margin-top: 4px;">Affects estimated
+                            wait times</div>
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--neutral-100);">
+                        <label style="margin: 0; cursor: pointer;">Fast-Track Emergency</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Delay Actions -->
+                <div class="status-card" style="border-color: var(--warning-orange);">
+                    <h3 style="font-size: 1.1rem; margin-bottom: var(--space-2); color: var(--warning-orange);">Delay
+                        Management</h3>
+                    <p style="font-size: 0.85rem; color: var(--neutral-600); margin-bottom: var(--space-4);">Need to
+                        step out? Notify patients immediately.</p>
+
+                    <button class="btn btn-outline"
+                        style="width: 100%; border-color: var(--warning-orange); color: var(--warning-orange);"
+                        onclick="showDelayModal()">
+                        ⚠️ Mark Patient Delay
+                    </button>
+                    <button class="btn btn-outline"
+                        style="width: 100%; margin-top: var(--space-2); border-color: var(--neutral-300); color: var(--neutral-600);"
+                        onclick="alert('Notification sent to waiting patients.')">
+                        📢 Broadcast Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Schedule View -->
+            <div class="schedule-view">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+                    <h2 style="font-size: 1.25rem;">Daily Timeline</h2>
+                    <button class="btn btn-primary btn-sm">Save Changes</button>
+                </div>
+
+                <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div>
+                        <label>OPD Start Time</label>
+                        <input type="time" class="input-field" value="09:00">
+                    </div>
+                    <div>
+                        <label>OPD End Time</label>
+                        <input type="time" class="input-field" value="17:00">
+                    </div>
+                </div>
+
+                <div class="timeline-container">
+                    <div class="timeline-event">
+                        <div class="event-time">09:00 AM</div>
+                        <div class="event-card" style="border-left: 4px solid var(--success-green);">
+                            <div class="event-title">Morning OPD Session</div>
+                            <div class="event-details">General Consultation • 30 Slots</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-event">
+                        <div class="event-time">01:00 PM</div>
+                        <div class="event-card"
+                            style="border-left: 4px solid var(--warning-orange); background: rgba(249, 115, 22, 0.05);">
+                            <div class="event-title">Lunch Break</div>
+                            <div class="event-details">
+                                <span style="font-weight: 500;">Auto-Pause Queue:</span> 1:00 PM - 2:00 PM
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-event">
+                        <div class="event-time">02:00 PM</div>
+                        <div class="event-card" style="border-left: 4px solid var(--success-green);">
+                            <div class="event-title">Afternoon OPD Session</div>
+                            <div class="event-details">Follow-ups & Reports • 20 Slots</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-event">
+                        <div class="event-time">05:00 PM</div>
+                        <div class="event-card" style="border-left: 4px solid var(--neutral-400);">
+                            <div class="event-title">Queue Closure</div>
+                            <div class="event-details">New tokens stopped</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="margin-top: var(--space-8); padding: var(--space-4); background: var(--neutral-50); border-radius: var(--radius-lg);">
+                    <h4 style="font-size: 0.95rem; margin-bottom: var(--space-2);">Break Management</h4>
+                    <div style="display: flex; gap: var(--space-4); align-items: flex-end;">
+                        <div class="input-group" style="margin-bottom: 0; flex: 1;">
+                            <label>Break Start</label>
+                            <input type="time" class="input-field" value="13:00">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0; flex: 1;">
+                            <label>Break End</label>
+                            <input type="time" class="input-field" value="14:00">
+                        </div>
+                        <label class="toggle-switch" style="margin-bottom: 10px;">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delay Modal -->
+    <div class="overlay" id="overlay" onclick="closeDelayModal()"></div>
+    <div class="delay-modal" id="delay-modal">
+        <h3 style="margin-bottom: var(--space-4);">Mark Delay</h3>
+        <div class="input-group">
+            <label>Delay Duration</label>
+            <select class="input-field">
+                <option>15 Minutes</option>
+                <option>30 Minutes</option>
+                <option>1 Hour</option>
+                <option>Indefinite (Emergency)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Reason for Delay</label>
+            <textarea class="input-field" style="height: 80px; resize: none;"
+                placeholder="e.g. Emergency surgery call..."></textarea>
+        </div>
+        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-6);">
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeDelayModal()">Cancel</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="confirmDelay()">Notify Patients</button>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('smartcare_user_email');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function setStatus(status) {
+            document.querySelectorAll('.switch-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(`.switch-option[data-status="${status}"]`).classList.add('active');
+
+            const badge = document.getElementById('schedule-status-badge');
+            if (status === 'available') {
+                badge.innerHTML = '<div class="status-dot"></div> OPD Running';
+                badge.style.background = 'rgba(16, 185, 129, 0.1)';
+                badge.style.color = 'var(--success-green)';
+            } else if (status === 'break') {
+                badge.innerHTML = '<div class="status-dot" style="animation: none; background: currentColor;"></div> On Break';
+                badge.style.background = 'rgba(249, 115, 22, 0.1)';
+                badge.style.color = 'var(--warning-orange)';
+            } else {
+                badge.innerHTML = '<div class="status-dot" style="animation: none; background: currentColor;"></div> Unavailable';
+                badge.style.background = 'rgba(239, 68, 68, 0.1)';
+                badge.style.color = 'var(--danger-red)';
+            }
+        }
+
+        function showDelayModal() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('delay-modal').style.display = 'block';
+        }
+
+        function closeDelayModal() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('delay-modal').style.display = 'none';
+        }
+
+        function confirmDelay() {
+            alert('Delay registered and patients notified via SMS/App.');
+            closeDelayModal();
+        }
+    </script>
+</body>
+
+</html>

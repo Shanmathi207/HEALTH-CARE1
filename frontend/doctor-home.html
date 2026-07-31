@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Care Doctor Dashboard">
+    <title>Doctor Dashboard - Smart Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Dashboard Specific Styles */
+        body {
+            background-color: var(--neutral-50);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--neutral-200);
+            padding: var(--space-6);
+            position: fixed;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+        }
+
+        .sidebar-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--neutral-600);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: var(--neutral-100);
+            color: var(--neutral-900);
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            padding: var(--space-8);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-8);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            transition: all var(--transition-base);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue-light);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .card-title {
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--neutral-800);
+            font-family: var(--font-display);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .icon-blue {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .icon-green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .icon-orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .icon-purple {
+            background: rgba(147, 51, 234, 0.1);
+            color: #9333ea;
+        }
+
+        .stat-value {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            color: var(--neutral-900);
+            font-family: var(--font-display);
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-label {
+            color: var(--neutral-500);
+            font-size: var(--text-sm);
+        }
+
+        /* Active Queue Card */
+        .queue-card {
+            background: var(--gradient-primary);
+            color: var(--white);
+            grid-column: span 1;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .queue-card .card-title,
+        .queue-card .stat-value,
+        .queue-card .stat-label {
+            color: var(--white);
+        }
+
+        .queue-card .stat-value {
+            font-size: 3.5rem;
+        }
+
+        .queue-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Patient Queue List */
+        .patient-list {
+            grid-column: span 2;
+        }
+
+        .patient-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--neutral-100);
+            gap: var(--space-4);
+            transition: background-color 0.2s;
+        }
+
+        .patient-item:hover {
+            background-color: var(--neutral-50);
+        }
+
+        .patient-item:last-child {
+            border-bottom: none;
+        }
+
+        .token-box {
+            background: var(--neutral-100);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .token-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: block;
+        }
+
+        .patient-info {
+            flex: 1;
+        }
+
+        .patient-info h4 {
+            font-size: var(--text-base);
+            margin-bottom: 2px;
+        }
+
+        .patient-info p {
+            font-size: var(--text-sm);
+            color: var(--neutral-500);
+            margin-bottom: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: var(--radius-md);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .action-btn {
+            background: var(--white);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-3);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-blue);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--neutral-50);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            transition: all var(--transition-base);
+        }
+
+        .action-btn:hover .action-icon {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .action-label {
+            font-weight: 600;
+            color: var(--neutral-700);
+            font-size: var(--text-sm);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                grid-column: 1;
+                padding: var(--space-4);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-list {
+                grid-column: span 1;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"></div>
+                <h3>Smart Care</h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active">
+                    <span>🏠</span> Dashboard
+                </div>
+                <div class="nav-item" onclick="window.location.href='doctor-patients.html'">
+                    <span>👥</span> <span>My Patients</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='doctor-schedule.html'">
+                    <span>📅</span> <span>Schedule</span>
+                </div>
+                <div class="nav-item">
+                    <span>💬</span> Messages
+                </div>
+
+                <div class="nav-item">
+                    <span>⚙️</span> Settings
+                </div>
+                <div class="nav-item" style="margin-top: auto; color: var(--danger-red);" onclick="logout()">
+                    <span>🚪</span> Logout
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div>
+                    <h1 style="margin-bottom: 0.5rem;">Hello, <span class="gradient-text">Dr. Sarah</span></h1>
+                    <p style="color: var(--neutral-500); margin: 0;">Here's your schedule for today.</p>
+                </div>
+                <div class="user-profile">
+                    <button class="btn btn-outline"
+                        style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">🔔</button>
+                    <div class="user-avatar">D</div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="dashboard-grid">
+                <!-- Active Queue Status -->
+                <div class="card queue-card">
+                    <div class="card-header">
+                        <span class="card-title">Live Token</span>
+                        <span class="queue-badge">OPD 1</span>
+                    </div>
+                    <div class="stat-value">#35</div>
+                    <div class="stat-label">Currently Serving</div>
+                    <div style="margin-top: var(--space-4);">
+                        <button class="btn"
+                            style="background: rgba(255,255,255,0.2); color: white; width: 100%; border: 1px solid rgba(255,255,255,0.3);"
+                            onclick="nextPatient()">Next Patient ➜</button>
+                    </div>
+                </div>
+
+                <!-- Stats 2 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Patients Remaining</span>
+                        <div class="card-icon icon-blue">👥</div>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Estimated time: 2h 30m</div>
+                    <div class="badge badge-warning"
+                        style="display: inline-block; margin-top: var(--space-2); background: rgba(37, 99, 235, 0.1); color: var(--primary-blue); border: none;">
+                        On Time</div>
+                </div>
+
+                <!-- Stats 3 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Appointments</span>
+                        <div class="card-icon icon-purple">📅</div>
+                    </div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Scheduled for today</div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: var(--space-4); padding: 8px;">View
+                        Calendar</button>
+                </div>
+            </div>
+            <!-- Patient Queue List -->
+            <div class="card patient-list" style="margin-top: var(--space-8);">
+                <div class="card-header">
+                    <span class="card-title">Patient Queue</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-sm">Refresh</button>
+                        <a href="#" style="font-size: 0.875rem; font-weight: 600; align-self: center;">View All</a>
+                    </div>
+                </div>
+
+                <!-- Current Patient -->
+                <div class="patient-item"
+                    style="background-color: var(--neutral-50); border: 1px solid var(--primary-blue-light);">
+                    <div class="token-box" style="background-color: var(--white);">
+                        <span class="token-number">35</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4 style="color: var(--primary-blue);">John Doe (Current)</h4>
+                        <p>Fever & Cold • Checked in 10:15 AM</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm">Consulting</button>
+                    </div>
+                </div>
+
+                <!-- Next Patients -->
+                <div class="patient-item">
+                    <div class="token-box">
+                        <span class="token-number">36</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4>Jane Smith</h4>
+                        <p>General Checkup • Checked in 10:20 AM</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary btn-sm">Call</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Communication Section -->
+            <div class="card" style="margin-top: var(--space-8);">
+                <div class="card-header">
+                    <span class="card-title">Patient Communication (Messages to Send)</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm">New Message</button>
+                        <button class="btn btn-outline btn-sm">Templates</button>
+                    </div>
+                </div>
+
+                <div class="patient-item" style="cursor: pointer;">
+                    <div class="token-box">
+                        <span class="token-number">#35</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4 style="display: flex; justify-content: space-between;">
+                            John Doe
+                            <span style="font-size: 0.75rem; color: var(--neutral-400);">Action Needed</span>
+                        </h4>
+                        <p style="color: var(--primary-blue); font-weight: 500;">Send pre-op instructions for next week
+                        </p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-sm">Send Now</button>
+                    </div>
+                </div>
+
+                <div class="patient-item" style="cursor: pointer;">
+                    <div class="token-box">
+                        <span class="token-number">#22</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4>Jane Smith</h4>
+                        <p style="color: var(--neutral-500);">Follow-up: Check prescription adherence (2 days ago)</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm">Reschedule Message</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        window.addEventListener('load', () => {
+            const userEmail = localStorage.getItem('smartcare_user_email');
+            if (userEmail) {
+                console.log('Logged in as ' + userEmail);
+            }
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('smartcare_user_email');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function nextPatient() {
+            const currentToken = document.querySelector('.queue-card .stat-value');
+            let tokenNum = parseInt(currentToken.textContent.replace('#', ''));
+            currentToken.textContent = '#' + (tokenNum + 1);
+            alert('Calling next patient: #' + (tokenNum + 1));
+        }
+    </script>
+</body>
+
+</html>
