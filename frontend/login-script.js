@@ -18,7 +18,6 @@ tabButtons.forEach(button => {
 
         // Get the selected user type
         const userType = button.getAttribute('data-tab');
-        console.log(`Switched to ${userType} login`);
 
         // Update form placeholder based on user type
         updatePlaceholders(userType);
@@ -28,7 +27,6 @@ tabButtons.forEach(button => {
 // Update placeholders based on user type
 function updatePlaceholders(userType) {
     const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
 
     switch (userType) {
         case 'patient':
@@ -47,32 +45,7 @@ function updatePlaceholders(userType) {
     }
 }
 
-// === Demo Login (no backend required) ===
-const DEMO_ACCOUNTS = {
-    patient: { email: 'patient@demo.com', password: 'password123', name: 'Demo Patient' },
-    doctor: { email: 'doctor@demo.com', password: 'password123', name: 'Demo Doctor' },
-    hospital: { email: 'admin@demo.com', password: 'password123', name: 'Demo Admin' }
-};
-
-function performDemoLogin(email, password, userType) {
-    const demo = DEMO_ACCOUNTS[userType];
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const matchesDemo = demo && email === demo.email && password === demo.password;
-    const acceptsAnyValid = emailRegex.test(email) && password.length >= 6;
-
-    if (!matchesDemo && !acceptsAnyValid) {
-        return null;
-    }
-
-    return {
-        token: `demo-token-${Date.now()}`,
-        user: {
-            email,
-            userType,
-            name: demo && email === demo.email ? demo.name : email.split('@')[0]
-        }
-    };
-}
+const AUTH_ENDPOINT = 'http://127.0.0.1:5000/api/auth/login';
 
 function completeLogin(data, email) {
     const userName = (data.user?.name || data.user?.email || email).toString().split('@')[0];
@@ -98,15 +71,28 @@ function completeLogin(data, email) {
     }, 800);
 }
 
-function fillDemoCredentials(userType) {
-    const demo = DEMO_ACCOUNTS[userType];
-    if (!demo) return;
+function detectLocation() {
+    if (!locationInput) return;
 
-    emailInput.value = demo.email;
-    passwordInput.value = demo.password;
-    emailInput.classList.add('success');
-    passwordInput.classList.add('success');
-    document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+    if (!navigator.geolocation) {
+        locationInput.value = 'Location not supported by browser';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude } = position.coords;
+            locationInput.value = `Lat: ${latitude.toFixed(5)}, Lon: ${longitude.toFixed(5)}`;
+        },
+        (error) => {
+            if (error.code === error.PERMISSION_DENIED) {
+                locationInput.value = 'Location access denied';
+            } else {
+                locationInput.value = 'Unable to detect location';
+            }
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
 }
 
 // === Password Toggle ===
@@ -210,56 +196,37 @@ loginForm.addEventListener('submit', (e) => {
     loginButton.classList.add('loading');
     loginButton.disabled = true;
 
-    setTimeout(() => {
+    fetch(AUTH_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, userType })
+    })
+    .then(async response => {
         loginButton.classList.remove('loading');
         loginButton.disabled = false;
 
-        const data = performDemoLogin(email, password, userType);
-        if (data) {
+            const data = await response.json().catch(() => null);
+            console.log('Login response:', response.status, data);
+
+            if (!response.ok) {
+                const message = data?.message || data?.error || 'Login failed. Please check your credentials.';
+                alert(message);
+                return;
+            }
+
+            if (!data || !data.user) {
+                alert('Login failed: invalid server response. Please try again.');
+                return;
+            }
+
             completeLogin(data, email);
-            return;
-        }
-
-        alert('Login failed. Use the demo credentials shown above, or any valid email with a 6+ character password.');
-    }, 500);
+    })
+    .catch(() => {
+        loginButton.classList.remove('loading');
+        loginButton.disabled = false;
+        alert('Unable to reach the authentication server. Please make sure the backend is running.');
+    });
 });
-
-// Show login success
-function showLoginSuccess(userType, email) {
-    // Store user session
-    const userName = email.split('@')[0];
-    localStorage.setItem('smartcare_user_email', email);
-    localStorage.setItem('smartcare_user_type', userType);
-    localStorage.setItem('smartcare_user_name', userName);
-    localStorage.removeItem('Smart Care_user_email');
-    localStorage.removeItem('Smart Care_user_type');
-
-    if (userType === 'patient') {
-        // Redirect to patient dashboard
-        const loginButton = document.querySelector('.login-button');
-        loginButton.innerHTML = '<span>Success! Redirecting...</span>';
-        setTimeout(() => {
-            window.location.href = 'patient-home.html';
-        }, 500);
-    } else if (userType === 'doctor') {
-        // Redirect to doctor dashboard
-        const loginButton = document.querySelector('.login-button');
-        loginButton.innerHTML = '<span>Success! Redirecting...</span>';
-        setTimeout(() => {
-            window.location.href = 'doctor-home.html';
-        }, 500);
-    } else if (userType === 'hospital') {
-        // Redirect to hospital admin dashboard
-        const loginButton = document.querySelector('.login-button');
-        loginButton.innerHTML = '<span>Success! Redirecting...</span>';
-        setTimeout(() => {
-            window.location.href = 'hospital-home.html';
-        }, 500);
-    } else {
-        const userTypeLabel = userType.charAt(0).toUpperCase() + userType.slice(1);
-        alert(`🎉 Login Successful!\n\nUser Type: ${userTypeLabel}\nEmail: ${email}\n\nThis is a demo version. In a full implementation, you would be redirected to:\n\n• Patient Dashboard - View symptoms, tokens, appointments\n• Doctor Dashboard - Manage queue, view patients\n• Hospital Admin - Analytics, staff management\n\nThank you for exploring Smart Care!`);
-    }
-}
 
 // === Social Login Handlers ===
 const socialButtons = document.querySelectorAll('.social-btn');
@@ -268,7 +235,7 @@ socialButtons.forEach(button => {
     button.addEventListener('click', () => {
         const provider = button.classList.contains('google') ? 'Google' : 'Phone';
 
-        alert(`🔐 ${provider} Login\n\nThis feature would integrate with:\n• Google OAuth 2.0 (for Google login)\n• OTP verification (for Phone login)\n\nDemo version - Feature not implemented.`);
+        alert(`🔐 ${provider} Login\n\nThis feature is not available in this build. Please contact support for account access options.`);
     });
 });
 
@@ -278,12 +245,10 @@ const signupLink = document.getElementById('signupLink');
 if (signupLink) {
     signupLink.addEventListener('click', (e) => {
         e.preventDefault();
-
-        alert('📝 Sign Up\n\nIn a full implementation, this would open a registration form with:\n\n• Personal information\n• Contact details\n• User type selection\n• Email verification\n• Terms acceptance\n\nDemo version - Feature not implemented.');
+        alert('📝 Sign Up\n\nRegistration is not available in this version. Please contact support or use an existing account to sign in.');
     });
 }
 
-// === Forgot Password Handler ===
 const forgotLink = document.querySelector('.forgot-link');
 
 if (forgotLink) {
@@ -295,7 +260,7 @@ if (forgotLink) {
         if (email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailRegex.test(email)) {
-                alert(`✅ Password Reset Email Sent!\n\nA password reset link has been sent to:\n${email}\n\n(Demo version - No actual email sent)`);
+                alert(`✅ Password Reset Requested\n\nIf this email is registered, you will receive instructions to reset your password.`);
             } else {
                 alert('❌ Invalid email address. Please try again.');
             }
@@ -344,21 +309,13 @@ window.addEventListener('load', () => {
                 input.classList.add('success');
             }
         });
+
+        const activeTab = document.querySelector('.tab-btn.active');
+        const userType = activeTab ? activeTab.getAttribute('data-tab') : 'patient';
+        updatePlaceholders(userType);
     }, 500);
 });
 
-// === Demo Credentials Helper ===
-document.querySelectorAll('[data-demo-fill]').forEach(button => {
-    button.addEventListener('click', () => {
-        const userType = button.getAttribute('data-demo-fill');
-        const tab = document.querySelector(`.tab-btn[data-tab="${userType}"]`);
-        if (tab) tab.click();
-        fillDemoCredentials(userType);
-    });
-});
-
-console.log('%c🔐 Smart Care Login Demo', 'color: #2563eb; font-size: 16px; font-weight: bold;');
-console.log('%cDemo mode: backend not required. Use the buttons on the page or any valid email + 6+ char password.', 'color: #64748b; font-size: 12px;');
 
 // === Page Load Animation ===
 window.addEventListener('load', () => {
@@ -439,35 +396,5 @@ tabButtons.forEach(button => {
         announceToScreenReader(`Switched to ${userType} login`);
     });
 });
-
-// === Geolocation Logic ===
-function detectLocation() {
-    if (!locationInput) return;
-
-    if ("geolocation" in navigator) {
-        locationInput.value = "Detecting location...";
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const lat = position.coords.latitude.toFixed(4);
-                const lon = position.coords.longitude.toFixed(4);
-                locationInput.value = `Lat: ${lat}, Lon: ${lon}`;
-
-                // Optional: Reverse geocoding could go here if we had an API key
-                // For demo, we just show coordinates
-            },
-            (error) => {
-                console.error("Error detecting location:", error);
-                locationInput.value = "Location access denied";
-            }
-        );
-    } else {
-        locationInput.value = "Geolocation not supported";
-    }
-}
-
-// Initialize location if patient tab is active
-if (document.querySelector('.tab-btn[data-tab="patient"]').classList.contains('active')) {
-    detectLocation();
-}
 
 console.log('%c✅ Login page initialized successfully!', 'color: #10b981; font-weight: bold;');

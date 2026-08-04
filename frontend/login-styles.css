@@ -510,53 +510,6 @@ body {
     text-decoration: underline;
 }
 
-/* === Demo Credentials === */
-.demo-credentials {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(37, 99, 235, 0.08);
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: var(--radius-lg);
-}
-
-.demo-credentials-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--primary-blue-dark);
-    margin-bottom: 0.75rem;
-}
-
-.demo-credentials-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.demo-credential-btn {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid rgba(37, 99, 235, 0.25);
-    border-radius: var(--radius-md);
-    background: var(--white);
-    color: var(--neutral-700);
-    font-size: 0.8125rem;
-    text-align: left;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.demo-credential-btn:hover {
-    border-color: var(--primary-blue);
-    background: rgba(37, 99, 235, 0.05);
-    color: var(--primary-blue-dark);
-}
-
-.demo-credentials-note {
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--neutral-600);
-}
-
 /* === Disclaimer === */
 .disclaimer {
     display: flex;

@@ -400,7 +400,7 @@
                 <div class="user-profile">
                     <button class="btn btn-outline"
                         style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">🔔</button>
-                    <div class="user-avatar">A</div>
+                    <div class="user-avatar" id="patient-avatar">A</div>
                 </div>
             </div>
 
@@ -563,65 +563,23 @@
         </main>
     </div>
 
+    <script src="symptom-matcher.js"></script>
     <script>
         // ---------------------------------------------------------
         // REAL AI Symptom Suggestion (connects to Flask model API)
         // ---------------------------------------------------------
-        const AI_API_BASE = 'http://localhost:5000';
+        const AI_API_BASE = 'http://127.0.0.1:5001';
         let aiKnownSymptoms = [];
+        let extractSymptomsFromText = () => [];
 
         // Load valid symptom list once
         fetch(`${AI_API_BASE}/symptoms`)
             .then(res => res.json())
-            .then(data => { aiKnownSymptoms = data.symptoms; })
-            .catch(() => console.warn('Could not reach AI backend at localhost:5000'));
-
-        function extractSymptomsFromText(text) {
-            const normalized = text.toLowerCase();
-
-            // Common everyday words -> exact dataset symptom keys
-            const synonymMap = {
-                'fever': 'high_fever',
-                'mild fever': 'mild_fever',
-                'cold': 'continuous_sneezing',
-                'runny nose': 'runny_nose',
-                'stuffy nose': 'congestion',
-                'body pain': 'muscle_pain',
-                'body ache': 'muscle_pain',
-                'tired': 'fatigue',
-                'tiredness': 'fatigue',
-                'throwing up': 'vomiting',
-                'loose motion': 'diarrhoea',
-                'loose motions': 'diarrhoea',
-                'stomach ache': 'stomach_pain',
-                'belly pain': 'stomach_pain',
-                'weakness': 'muscle_weakness',
-                'itchy skin': 'itching',
-                'rash': 'skin_rash',
-                'sore throat': 'throat_irritation',
-                'cant sleep': 'restlessness',
-                "can't sleep": 'restlessness'
-            };
-
-            const found = new Set();
-
-            // 1. Direct exact-phrase matches against real dataset symptom names
-            aiKnownSymptoms.forEach(key => {
-                const phrase = key.replace(/_/g, ' ').trim().toLowerCase();
-                if (normalized.includes(phrase)) {
-                    found.add(key);
-                }
-            });
-
-            // 2. Synonym matches for common everyday words
-            Object.keys(synonymMap).forEach(word => {
-                if (normalized.includes(word) && aiKnownSymptoms.includes(synonymMap[word])) {
-                    found.add(synonymMap[word]);
-                }
-            });
-
-            return Array.from(found);
-        }
+            .then(data => {
+                aiKnownSymptoms = data.symptoms;
+                extractSymptomsFromText = createMatcher(aiKnownSymptoms);
+            })
+            .catch(() => console.warn('Could not reach AI backend at 127.0.0.1:5001'));
 
         function runSymptomSuggestion() {
             const text = document.getElementById('ai-symptom-input').value.trim();
@@ -634,11 +592,11 @@
 
             const matched = extractSymptomsFromText(text);
 
-            if (matched.length < 4) {
+            if (matched.length < 3) {
                 resultBox.innerHTML = `
                     <div style="color: var(--neutral-600);">
                         I found ${matched.length} recognizable symptom(s)${matched.length ? ': <strong>' + matched.map(s => s.replace(/_/g,' ')).join(', ') + '</strong>' : ''}.
-                        Please describe at least 4 clear symptoms (e.g. "high fever, headache, nausea, vomiting") for an accurate suggestion.
+                        Please describe at least 3 clear symptoms (e.g. "high fever, headache, vomiting") for an accurate suggestion.
                     </div>`;
                 return;
             }
@@ -662,7 +620,7 @@
                 saveSymptomCheck(text);
             })
             .catch(() => {
-                resultBox.innerHTML = `<div style="color: var(--danger-red);">Could not reach the analysis server. Make sure app.py is running on localhost:5000.</div>`;
+                resultBox.innerHTML = `<div style="color: var(--danger-red);">Could not reach the analysis server. Make sure app.py is running on 127.0.0.1:5000.</div>`;
             });
         }
 
@@ -742,21 +700,23 @@
             URL.revokeObjectURL(url);
         }
 
-        // NOTE: The backend does not yet have a file-storage endpoint,
-        // so this stores the report reference in the browser (localStorage) for now.
-        // Once a real /api/reports/upload endpoint exists, replace the body of this
-        // function with a fetch() call that sends FormData to the backend + MySQL/disk.
+        function getCurrentPatientReportKey() {
+            const userEmail = localStorage.getItem('smartcare_user_email') || 'guest';
+            return `smartcare_uploaded_reports_${userEmail}`;
+        }
+
         function uploadHealthReport(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            const reports = JSON.parse(localStorage.getItem('smartcare_uploaded_reports') || '[]');
+            const key = getCurrentPatientReportKey();
+            const reports = JSON.parse(localStorage.getItem(key) || '[]');
             reports.unshift({
                 name: file.name,
                 size: (file.size / 1024).toFixed(1) + ' KB',
                 date: new Date().toLocaleString()
             });
-            localStorage.setItem('smartcare_uploaded_reports', JSON.stringify(reports.slice(0, 10)));
+            localStorage.setItem(key, JSON.stringify(reports.slice(0, 10)));
 
             renderUploadedReports();
             event.target.value = ''; // reset input so the same file can be re-selected later
@@ -765,7 +725,8 @@
         function renderUploadedReports() {
             const list = document.getElementById('uploaded-reports-list');
             if (!list) return;
-            const reports = JSON.parse(localStorage.getItem('smartcare_uploaded_reports') || '[]');
+
+            const reports = JSON.parse(localStorage.getItem(getCurrentPatientReportKey()) || '[]');
 
             if (reports.length === 0) {
                 list.innerHTML = '';
@@ -824,6 +785,16 @@
         window.addEventListener('load', () => {
             const userName = localStorage.getItem('smartcare_user_name') || 'Demo Patient';
             document.getElementById('patient-name').textContent = userName;
+            const avatarElement = document.getElementById('patient-avatar');
+            if (avatarElement) {
+                avatarElement.textContent = userName.trim().charAt(0).toUpperCase() || 'P';
+            }
+
+            // Remove legacy shared report storage so only per-user uploads remain
+            if (localStorage.getItem('smartcare_uploaded_reports')) {
+                localStorage.removeItem('smartcare_uploaded_reports');
+            }
+
             renderSymptomHistory();
             renderUploadedReports();
             loadNotifications();

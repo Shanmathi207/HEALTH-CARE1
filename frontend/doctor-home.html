@@ -174,6 +174,178 @@
             color: #9333ea;
         }
 
+        .calendar-modal,
+        .message-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            width: min(960px, 95%);
+            max-height: 92vh;
+            overflow: auto;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            border: none;
+            background: transparent;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--neutral-500);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.75rem;
+            margin-top: var(--space-4);
+        }
+
+        .calendar-cell {
+            min-height: 110px;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem;
+            display: grid;
+            gap: 0.5rem;
+            background: var(--neutral-50);
+        }
+
+        .calendar-cell.today {
+            border-color: var(--primary-blue);
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        .calendar-event {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--warning-orange);
+            border-radius: 0.75rem;
+            padding: 0.45rem 0.7rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .message-box {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .message-box textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 1rem;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .message-box .message-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .calendar-highlight {
+            color: var(--warning-orange);
+            font-weight: 700;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-header .subtitle {
+            color: var(--neutral-500);
+        }
+
+        .btn-modal {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--neutral-200);
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        .btn-modal.primary {
+            background: var(--primary-blue);
+            color: white;
+            border-color: transparent;
+        }
+
+        .calendar-details {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .calendar-details .detail-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            background: var(--neutral-50);
+        }
+
+        .calendar-details .detail-row span:first-child {
+            font-weight: 700;
+        }
+
+        .calendar-details .detail-row span:last-child {
+            color: var(--neutral-600);
+        }
+
+        .patient-item.orange {
+            background: rgba(249, 115, 22, 0.12);
+            border-color: rgba(249, 115, 22, 0.35);
+            animation: pulseGlow 1.2s ease-in-out;
+        }
+        .patient-item.orange .patient-info h4 {
+            color: var(--warning-orange);
+        }
+
+        .queue-card .stat-value.animate {
+            animation: pulseScale 0.8s ease-in-out;
+        }
+
+        .patient-item.animate {
+            animation: pulseGlow 1.2s ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 rgba(249, 115, 22, 0.0); }
+            50% { box-shadow: 0 0 18px rgba(249, 115, 22, 0.35); }
+            100% { box-shadow: 0 0 0 rgba(249, 115, 22, 0.0); }
+        }
+
+        @keyframes pulseScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+
         .stat-value {
             font-size: var(--text-4xl);
             font-weight: 800;
@@ -400,13 +572,13 @@
         <main class="main-content">
             <div class="top-bar">
                 <div>
-                    <h1 style="margin-bottom: 0.5rem;">Hello, <span class="gradient-text">Dr. Sarah</span></h1>
+                    <h1 style="margin-bottom: 0.5rem;">Hello, <span id="doctor-name" class="gradient-text">Dr. Selvarani</span></h1>
                     <p style="color: var(--neutral-500); margin: 0;">Here's your schedule for today.</p>
                 </div>
                 <div class="user-profile">
                     <button class="btn btn-outline"
                         style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">🔔</button>
-                    <div class="user-avatar">D</div>
+                    <div class="user-avatar" id="doctor-avatar">D</div>
                 </div>
             </div>
 
@@ -418,7 +590,7 @@
                         <span class="card-title">Live Token</span>
                         <span class="queue-badge">OPD 1</span>
                     </div>
-                    <div class="stat-value">#35</div>
+                    <div class="stat-value" id="liveTokenValue">#35</div>
                     <div class="stat-label">Currently Serving</div>
                     <div style="margin-top: var(--space-4);">
                         <button class="btn"
@@ -433,7 +605,7 @@
                         <span class="card-title">Patients Remaining</span>
                         <div class="card-icon icon-blue">👥</div>
                     </div>
-                    <div class="stat-value">12</div>
+                    <div class="stat-value" id="patientsRemainingValue">12</div>
                     <div class="stat-label">Estimated time: 2h 30m</div>
                     <div class="badge badge-warning"
                         style="display: inline-block; margin-top: var(--space-2); background: rgba(37, 99, 235, 0.1); color: var(--primary-blue); border: none;">
@@ -446,10 +618,9 @@
                         <span class="card-title">Appointments</span>
                         <div class="card-icon icon-purple">📅</div>
                     </div>
-                    <div class="stat-value">8</div>
+                    <div class="stat-value" id="todayAppointmentCount">8</div>
                     <div class="stat-label">Scheduled for today</div>
-                    <button class="btn btn-outline" style="width: 100%; margin-top: var(--space-4); padding: 8px;">View
-                        Calendar</button>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: var(--space-4); padding: 8px;" onclick="openCalendarModal()">View Calendar</button>
                 </div>
             </div>
             <!-- Patient Queue List -->
@@ -457,39 +628,12 @@
                 <div class="card-header">
                     <span class="card-title">Patient Queue</span>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-outline btn-sm">Refresh</button>
+                        <button class="btn btn-outline btn-sm" onclick="refreshQueue()">Refresh</button>
                         <a href="#" style="font-size: 0.875rem; font-weight: 600; align-self: center;">View All</a>
                     </div>
                 </div>
 
-                <!-- Current Patient -->
-                <div class="patient-item"
-                    style="background-color: var(--neutral-50); border: 1px solid var(--primary-blue-light);">
-                    <div class="token-box" style="background-color: var(--white);">
-                        <span class="token-number">35</span>
-                    </div>
-                    <div class="patient-info">
-                        <h4 style="color: var(--primary-blue);">John Doe (Current)</h4>
-                        <p>Fever & Cold • Checked in 10:15 AM</p>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm">Consulting</button>
-                    </div>
-                </div>
-
-                <!-- Next Patients -->
-                <div class="patient-item">
-                    <div class="token-box">
-                        <span class="token-number">36</span>
-                    </div>
-                    <div class="patient-info">
-                        <h4>Jane Smith</h4>
-                        <p>General Checkup • Checked in 10:20 AM</p>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-secondary btn-sm">Call</button>
-                    </div>
-                </div>
+                <div id="patientQueueContainer"></div>
             </div>
 
             <!-- Patient Communication Section -->
@@ -497,58 +641,269 @@
                 <div class="card-header">
                     <span class="card-title">Patient Communication (Messages to Send)</span>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-primary btn-sm">New Message</button>
+                        <button class="btn btn-primary btn-sm" onclick="openMessageModal()">New Message</button>
                         <button class="btn btn-outline btn-sm">Templates</button>
                     </div>
                 </div>
 
-                <div class="patient-item" style="cursor: pointer;">
-                    <div class="token-box">
-                        <span class="token-number">#35</span>
-                    </div>
-                    <div class="patient-info">
-                        <h4 style="display: flex; justify-content: space-between;">
-                            John Doe
-                            <span style="font-size: 0.75rem; color: var(--neutral-400);">Action Needed</span>
-                        </h4>
-                        <p style="color: var(--primary-blue); font-weight: 500;">Send pre-op instructions for next week
-                        </p>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary btn-sm">Send Now</button>
-                    </div>
-                </div>
-
-                <div class="patient-item" style="cursor: pointer;">
-                    <div class="token-box">
-                        <span class="token-number">#22</span>
-                    </div>
-                    <div class="patient-info">
-                        <h4>Jane Smith</h4>
-                        <p style="color: var(--neutral-500);">Follow-up: Check prescription adherence (2 days ago)</p>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-outline btn-sm">Reschedule Message</button>
-                    </div>
-                </div>
+                <div id="communicationContainer"></div>
             </div>
 
 
         </main>
     </div>
 
+    <div class="calendar-modal" id="calendarModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeCalendarModal()">×</button>
+            <div class="calendar-header">
+                <div>
+                    <h2 id="calendarTitle">Doctor Calendar</h2>
+                    <p class="subtitle" id="calendarSubtitle">Appointments marked in orange are your active consultations.</p>
+                </div>
+                <button class="btn-modal" onclick="closeCalendarModal()">Close</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-details" id="calendarDetails"></div>
+        </div>
+    </div>
+
+    <div class="message-modal" id="messageModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeMessageModal()">×</button>
+            <div class="calendar-header">
+                <div>
+                    <h2>Send Message</h2>
+                    <p class="subtitle" id="messageRecipientLabel">Compose a message to your patient.</p>
+                </div>
+                <button class="btn-modal" onclick="closeMessageModal()">Close</button>
+            </div>
+            <div class="message-box">
+                <input type="text" id="messageSubject" placeholder="Subject" style="width:100%; padding:1rem; border:1px solid var(--neutral-200); border-radius:0.75rem;" />
+                <textarea id="messageBody" placeholder="Type your message here..."></textarea>
+                <div class="message-actions">
+                    <button class="btn-modal" onclick="closeMessageModal()">Cancel</button>
+                    <button class="btn-modal primary" onclick="sendMessage()">Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Check if user is logged in
+        const queuePatients = [
+            { token: 35, name: 'Shreeja', status: 'Current', reason: 'Fever & Cold', checkedIn: '10:15 AM', highlighted: true },
+            { token: 36, name: 'Manickam', status: 'Waiting', reason: 'General Checkup', checkedIn: '10:20 AM' },
+            { token: 37, name: 'Kavitha', status: 'Waiting', reason: 'Follow-up', checkedIn: '10:25 AM' },
+            { token: 38, name: 'Priya', status: 'Waiting', reason: 'Blood Pressure', checkedIn: '10:32 AM' }
+        ];
+
+        const calendarEvents = [
+            { day: 5, title: 'OPD Consultation', time: '10:00 AM', patient: 'Shreeja' },
+            { day: 7, title: 'Special Consultation', time: '02:00 PM', patient: 'Manickam' },
+            { day: 11, title: 'Follow-up Visit', time: '11:30 AM', patient: 'Kavitha' }
+        ];
+
+        const communicationTasks = [
+            { token: 35, patient: 'Shreeja', note: 'Send pre-op instructions for next week', action: 'Action Needed', button: 'Send Now', type: 'primary' },
+            { token: 22, patient: 'Manickam', note: 'Follow-up: Check prescription adherence (2 days ago)', action: 'Reminder', button: 'Reschedule Message', type: 'outline' }
+        ];
+
+        function renderPatientQueue() {
+            const container = document.getElementById('patientQueueContainer');
+            if (!container) return;
+
+            container.innerHTML = queuePatients.map(patient => `
+                <div class="patient-item ${patient.highlighted ? 'orange' : ''}">
+                    <div class="token-box" style="background-color: ${patient.highlighted ? 'white' : 'var(--neutral-100)'};">
+                        <span class="token-number">${patient.token}</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4 style="color: ${patient.highlighted ? 'var(--warning-orange)' : 'inherit'};">${patient.name}${patient.status === 'Current' ? ' (Current)' : ''}</h4>
+                        <p>${patient.reason} • Checked in ${patient.checkedIn}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn ${patient.highlighted ? 'btn-primary' : 'btn-secondary'} btn-sm" ${patient.highlighted ? '' : 'onclick="callPatient(' + patient.token + ')"'}>${patient.status === 'Current' ? 'Consulting' : 'Call'}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCommunicationTasks() {
+            const container = document.getElementById('communicationContainer');
+            if (!container) return;
+
+            container.innerHTML = communicationTasks.map(task => `
+                <div class="patient-item" style="cursor: pointer;">
+                    <div class="token-box">
+                        <span class="token-number">#${task.token}</span>
+                    </div>
+                    <div class="patient-info">
+                        <h4 style="display: flex; justify-content: space-between;">
+                            ${task.patient}
+                            <span style="font-size: 0.75rem; color: var(--neutral-400);">${task.action}</span>
+                        </h4>
+                        <p style="color: ${task.type === 'primary' ? 'var(--primary-blue)' : 'var(--neutral-500)'}; font-weight: ${task.type === 'primary' ? '500' : '400'};">${task.note}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn ${task.type === 'primary' ? 'btn-primary' : 'btn btn-outline'} btn-sm" onclick="openMessageModal('${task.patient}')">${task.button}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCalendarModal() {
+            document.getElementById('calendarModal').style.display = 'flex';
+            renderCalendar();
+        }
+
+        function closeCalendarModal() {
+            document.getElementById('calendarModal').style.display = 'none';
+        }
+
+        function openMessageModal(patient = '') {
+            const recipient = patient || 'Patient';
+            document.getElementById('messageRecipientLabel').textContent = `Compose a message to ${recipient}.`;
+            document.getElementById('messageSubject').value = recipient === 'Patient' ? '' : `Message for ${recipient}`;
+            document.getElementById('messageBody').value = `Hi ${recipient},\n\n`;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        function sendMessage() {
+            const subject = document.getElementById('messageSubject').value.trim();
+            const body = document.getElementById('messageBody').value.trim();
+
+            if (!subject || !body) {
+                alert('Please enter both subject and message text.');
+                return;
+            }
+
+            closeMessageModal();
+            alert('Message sent successfully!');
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const details = document.getElementById('calendarDetails');
+            if (!grid || !details) return;
+
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            grid.innerHTML = dayNames.map(day => `<div class="calendar-cell" style="font-weight:700; text-align:center;">${day}</div>`).join('');
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate();
+                const event = calendarEvents.find(item => item.day === day);
+                grid.innerHTML += `
+                    <div class="calendar-cell ${isToday ? 'today' : ''}">
+                        <div style="font-weight:700;">${day}</div>
+                        ${event ? `<div class="calendar-event">${event.time} • ${event.title}</div>` : '<div style="color: var(--neutral-400); font-size:0.85rem;">No appointments</div>'}
+                    </div>
+                `;
+            }
+
+            details.innerHTML = calendarEvents.map(item => `
+                <div class="detail-row">
+                    <span>${item.patient}</span>
+                    <span>${item.title} at ${item.time} on ${new Date(today.getFullYear(), today.getMonth(), item.day).toLocaleDateString()}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateDashboardStats() {
+            const tokenEl = document.getElementById('liveTokenValue');
+            const remainingEl = document.getElementById('patientsRemainingValue');
+            const appointmentCountEl = document.getElementById('todayAppointmentCount');
+            const currentPatient = queuePatients[0];
+            const remaining = Math.max(queuePatients.length - 1, 0);
+
+            if (tokenEl && currentPatient) {
+                tokenEl.textContent = `#${currentPatient.token}`;
+            }
+            if (remainingEl) {
+                remainingEl.textContent = `${remaining}`;
+            }
+            if (appointmentCountEl) {
+                appointmentCountEl.textContent = `${calendarEvents.length}`;
+            }
+        }
+
+        function refreshQueue() {
+            const current = queuePatients.shift();
+            if (current) {
+                current.status = 'Done';
+            }
+            const next = queuePatients[0];
+            if (next) {
+                next.status = 'Current';
+                next.highlighted = true;
+            }
+            if (queuePatients.length > 1) {
+                queuePatients[1].highlighted = false;
+            }
+            renderPatientQueue();
+            updateDashboardStats();
+            animateQueueUpdate();
+        }
+
+        function animateQueueUpdate() {
+            const tokenEl = document.getElementById('liveTokenValue');
+            if (tokenEl) {
+                tokenEl.classList.add('animate');
+                tokenEl.addEventListener('animationend', () => tokenEl.classList.remove('animate'), { once: true });
+            }
+            const firstRow = document.querySelector('#patientQueueContainer .patient-item');
+            if (firstRow) {
+                firstRow.classList.add('animate');
+                firstRow.addEventListener('animationend', () => firstRow.classList.remove('animate'), { once: true });
+            }
+        }
+
+        function callPatient(token) {
+            alert('Calling patient #' + token + ' to the consultation room.');
+        }
+
         window.addEventListener('load', () => {
             const userEmail = localStorage.getItem('smartcare_user_email');
+            const userName = localStorage.getItem('smartcare_user_name') || 'Doctor';
+            const userType = localStorage.getItem('smartcare_user_type');
+
             if (userEmail) {
                 console.log('Logged in as ' + userEmail);
             }
+
+            const nameElement = document.getElementById('doctor-name');
+            const avatarElement = document.getElementById('doctor-avatar');
+            const calendarTitle = document.getElementById('calendarTitle');
+            const calendarSubtitle = document.getElementById('calendarSubtitle');
+            if (nameElement) {
+                nameElement.textContent = userType === 'doctor' ? `Dr. ${userName}` : userName;
+            }
+            if (avatarElement) {
+                avatarElement.textContent = userName.trim().charAt(0).toUpperCase() || 'D';
+            }
+            if (calendarTitle) {
+                calendarTitle.textContent = `${userType === 'doctor' ? 'Dr. ' : ''}${userName}'s Calendar`;
+            }
+            if (calendarSubtitle) {
+                calendarSubtitle.textContent = `Dr. ${userName} is currently logged in. Appointments marked in orange are your active consultations.`;
+            }
+
+            renderPatientQueue();
+            renderCommunicationTasks();
+            updateDashboardStats();
         });
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('smartcare_user_email');
+                localStorage.removeItem('smartcare_user_name');
+                localStorage.removeItem('smartcare_user_type');
+                localStorage.removeItem('smartcare_token');
                 window.location.href = 'login.html';
             }
         }

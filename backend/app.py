@@ -48,8 +48,8 @@ def predict():
     data = request.get_json()
     input_symptoms = data.get('symptoms', [])
 
-    if len(input_symptoms) < 4:
-        return jsonify({"error": "Please select at least 4 symptoms for accurate prediction"}), 400
+    if len(input_symptoms) < 3:
+        return jsonify({"error": "Please select at least 3 symptoms for accurate prediction"}), 400
 
     unknown = [s for s in input_symptoms if s not in all_symptoms]
     if unknown:
@@ -82,4 +82,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

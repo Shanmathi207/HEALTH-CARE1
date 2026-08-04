@@ -3,11 +3,12 @@
  * Connects the chat interface to the Flask prediction API (localhost:5000)
  */
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'http://127.0.0.1:5001';
 
 let allSymptoms = [];         // full valid symptom list from backend
 let detectedSymptoms = new Set(); // symptoms found so far in conversation
 let latestPredictions = [];   // last /predict response
+let extractSymptoms = () => [];
 
 const chatHistory = document.getElementById('chat-history');
 const userInput = document.getElementById('user-input');
@@ -38,9 +39,10 @@ fetch(`${API_BASE}/symptoms`)
     .then(res => res.json())
     .then(data => {
         allSymptoms = data.symptoms;
+        extractSymptoms = createMatcher(allSymptoms);
     })
     .catch(() => {
-        appendBotMessage("I'm having trouble connecting to the analysis server. Please make sure the backend (app.py) is running on localhost:5000.");
+        appendBotMessage("I'm having trouble connecting to the analysis server. Please make sure the backend (app.py) is running on 127.0.0.1:5000.");
     });
 
 // ---------------------------------------------------------
@@ -79,18 +81,12 @@ function showTyping(show) {
 // Symptom matching: free text -> known symptom keys
 // e.g. "I have a high fever and headache" -> ["high_fever", "headache"]
 // ---------------------------------------------------------
-function extractSymptoms(text) {
-    const normalized = text.toLowerCase();
-    const found = [];
+function extractSymptomsFromText(text) {
+    if (typeof extractSymptoms === 'function') {
+        return extractSymptoms(text);
+    }
 
-    allSymptoms.forEach(symptomKey => {
-        const phrase = symptomKey.replace(/_/g, ' ').trim().toLowerCase();
-        if (normalized.includes(phrase)) {
-            found.push(symptomKey);
-        }
-    });
-
-    return found;
+    return [];
 }
 
 // ---------------------------------------------------------
@@ -194,6 +190,17 @@ function showReportModal(predictions, riskLevelLabel) {
     const top = predictions[0];
     specialistCard.textContent = `${top.specialist} recommended`;
 
+    const doctorSuggestionsList = document.getElementById('doctor-suggestions-list');
+    if (doctorSuggestionsList) {
+        doctorSuggestionsList.innerHTML = top.doctors.map(doc => `
+            <div class="doctor-suggestion-card" style="border: 1px solid var(--neutral-200); background: #ffffff; padding: 1rem; border-radius: 1rem; display: grid; gap: 0.5rem;">
+                <div style="font-weight: 700;">${doc.doctor}</div>
+                <div style="color: var(--neutral-500); font-size: 0.9rem;">${doc.hospital} • ${doc.location}</div>
+                <div style="color: var(--success-green); font-weight: 600;">Available: ${doc.availability}</div>
+            </div>
+        `).join('');
+    }
+
     // Store data for the doctor-suggestion page
     bookTokenBtn.onclick = () => {
         localStorage.setItem('suggestedSpecialist', top.specialist);
@@ -222,7 +229,7 @@ function handleSend() {
     appendUserMessage(text);
     userInput.value = '';
 
-    const newSymptoms = extractSymptoms(text);
+    const newSymptoms = extractSymptomsFromText(text);
     newSymptoms.forEach(s => detectedSymptoms.add(s));
     renderSymptomTags();
 
@@ -236,8 +243,8 @@ function handleSend() {
             return;
         }
 
-        if (detectedSymptoms.size < 4) {
-            appendBotMessage(`Got it — I've noted: <strong>${newSymptoms.map(s => s.replace(/_/g, ' ')).join(', ') || 'that'}</strong>. Please tell me if you have any other symptoms so I can analyze this accurately (need at least 4 total).`);
+        if (detectedSymptoms.size < 3) {
+            appendBotMessage(`Got it — I've noted: <strong>${newSymptoms.map(s => s.replace(/_/g, ' ')).join(', ') || 'that'}</strong>. Please tell me if you have any other symptoms so I can analyze this accurately (need at least 3 total).`);
             return;
         }
 

@@ -93,7 +93,7 @@
                     <div class="form-group">
                         <label for="name">Full Name</label>
                         <div class="input-wrapper">
-                            <input type="text" id="name" name="name" placeholder="John Doe" required>
+                            <input type="text" id="name" name="name" placeholder="Saraswathi Rajan" required>
                         </div>
                     </div>
 
@@ -170,6 +170,9 @@
                     </button>
                 </form>
 
+                <div id="signupSuccess" class="success-banner" style="display:none; margin-top:1rem; padding:1rem; border-radius:8px; background:#e6ffed; color:#065f46; border:1px solid #10b981;">
+                </div>
+
                 <div class="signup-prompt">
                     Already have an account? <a href="login.html">Login here</a>
                 </div>
@@ -200,7 +203,9 @@
             });
         });
 
-        document.getElementById('signupForm').addEventListener('submit', (e) => {
+        const REGISTER_ENDPOINT = 'http://127.0.0.1:5000/api/auth/register';
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('signupBtn');
             btn.classList.add('loading');
@@ -210,12 +215,58 @@
             const data = Object.fromEntries(formData.entries());
             data.userType = currentRole;
 
-            setTimeout(() => {
+            try {
+                const response = await fetch(REGISTER_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    const message = result?.message || 'Registration failed. Please try again.';
+                    throw new Error(message);
+                }
+
+                if (!result || !result.user) {
+                    throw new Error('Registration succeeded but server returned unexpected data.');
+                }
+
+                const authToken = result.token;
+                const authUser = result.user;
+                const fullName = formData.get('name').trim();
+                localStorage.setItem('smartcare_token', authToken);
+                localStorage.setItem('smartcare_user_email', authUser.email);
+                localStorage.setItem('smartcare_user_type', authUser.userType);
+                localStorage.setItem('smartcare_user_name', fullName);
+
+                const redirectPage = authUser.userType === 'doctor'
+                    ? 'doctor-home.html'
+                    : authUser.userType === 'hospital'
+                        ? 'hospital-home.html'
+                        : 'patient-home.html';
+
+                const successEl = document.getElementById('signupSuccess');
+                const displayEmail = (authUser && authUser.email) ? authUser.email : (data.email || 'your account');
+                const successMessage = `Signup complete for ${displayEmail}. Redirecting to your dashboard...`;
+
+                if (successEl) {
+                    successEl.textContent = successMessage;
+                    successEl.style.display = 'block';
+                } else {
+                    alert(successMessage);
+                }
+
+                setTimeout(() => {
+                    window.location.href = redirectPage;
+                }, 1400);
+            } catch (error) {
+                alert(error.message || 'Unable to register user.');
+            } finally {
                 btn.classList.remove('loading');
                 btn.disabled = false;
-                alert(`Demo signup complete for ${data.email}.\n\nUse the login page with the same email and password, or click a demo account button there.`);
-                window.location.href = 'login.html';
-            }, 600);
+            }
         });
     </script>
 </body>

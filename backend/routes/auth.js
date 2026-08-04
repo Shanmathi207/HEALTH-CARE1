@@ -16,12 +16,18 @@ router.post('/login', async (req, res) => {
     try {
         console.log('Login request body:', req.body);
         const { email, password, userType } = req.body;
+        if (!userType) {
+            return res.status(400).json({ message: 'Please select a login role (patient, doctor, or hospital).' });
+        }
 
-        // Find user by email and userType
-        const user = await User.findOne({ email, userType });
+        const user = await User.findOne({ email });
         console.log('Found user:', !!user, user && { email: user.email, userType: user.userType });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or user type' });
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        if (user.userType !== userType) {
+            return res.status(401).json({ message: `Please log in with a ${userType} account.` });
         }
 
         // Compare password
@@ -42,6 +48,7 @@ router.post('/login', async (req, res) => {
             token,
             user: {
                 id: user._id,
+                name: user.name,
                 email: user.email,
                 userType: user.userType
             }
@@ -87,7 +94,21 @@ router.post('/register', async (req, res) => {
         const user = new User(userData);
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully' });
+        const token = jwt.sign(
+            { id: user._id, email: user.email, userType: user.userType },
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: '1h' }
+        );
+
+        res.status(201).json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                userType: user.userType
+            }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server registration error' });
