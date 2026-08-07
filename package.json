@@ -5,9 +5,10 @@
   "description": "Run the Smart Care frontend and backend together for local development.",
   "scripts": {
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
-    "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix backend start\" \"npm --prefix frontend run dev\"",
+    "dev": "concurrently -n backend,frontend,ai -c blue,green,yellow \"npm --prefix backend start\" \"npm --prefix frontend run dev\" \"npm --prefix backend run start:ai\"",
     "backend": "npm --prefix backend start",
-    "frontend": "npm --prefix frontend run dev"
+    "frontend": "npm --prefix frontend run dev",
+    "ai": "npm --prefix backend run start:ai"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
