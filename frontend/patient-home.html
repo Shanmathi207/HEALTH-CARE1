@@ -568,7 +568,9 @@
         // ---------------------------------------------------------
         // REAL AI Symptom Suggestion (connects to Flask model API)
         // ---------------------------------------------------------
-        const AI_API_BASE = 'http://127.0.0.1:5001';
+        const _ai_host = location.hostname && location.hostname.length ? location.hostname : '127.0.0.1';
+        const _ai_protocol = (location.protocol && location.protocol.startsWith('http')) ? location.protocol : 'http:';
+        const AI_API_BASE = `${_ai_protocol}//${_ai_host}:5001`;
         let aiKnownSymptoms = [];
         let extractSymptomsFromText = () => [];
 
@@ -579,7 +581,7 @@
                 aiKnownSymptoms = data.symptoms;
                 extractSymptomsFromText = createMatcher(aiKnownSymptoms);
             })
-            .catch(() => console.warn('Could not reach AI backend at 127.0.0.1:5001'));
+            .catch(() => console.warn(`Could not reach AI backend at ${AI_API_BASE}`));
 
         function runSymptomSuggestion() {
             const text = document.getElementById('ai-symptom-input').value.trim();
@@ -620,7 +622,7 @@
                 saveSymptomCheck(text);
             })
             .catch(() => {
-                resultBox.innerHTML = `<div style="color: var(--danger-red);">Could not reach the analysis server. Make sure app.py is running on 127.0.0.1:5000.</div>`;
+                resultBox.innerHTML = `<div style="color: var(--danger-red);">Could not reach the analysis server. Make sure app.py is running at ${AI_API_BASE}.</div>`;
             });
         }
 

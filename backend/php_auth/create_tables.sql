@@ -1,0 +1,32 @@
+CREATE DATABASE IF NOT EXISTS healthcare;
+
+USE healthcare;
+
+CREATE TABLE IF NOT EXISTS health (
+
+   id INT NOT NULL AUTO_INCREMENT,
+
+    email VARCHAR(255) NOT NULL,
+
+    password VARCHAR(255) NOT NULL,
+
+    user_type VARCHAR(50) DEFAULT NULL,
+
+    name VARCHAR(255) DEFAULT NULL,
+
+    phone VARCHAR(50) DEFAULT NULL,
+
+    specialization VARCHAR(255) DEFAULT NULL,
+
+    department VARCHAR(255) DEFAULT NULL,
+
+    hospital_name VARCHAR(255) DEFAULT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY email_unique (email)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4;

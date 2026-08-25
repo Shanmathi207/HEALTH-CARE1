@@ -3,7 +3,9 @@
  * Connects the chat interface to the Flask prediction API (localhost:5000)
  */
 
-const API_BASE = 'http://127.0.0.1:5001';
+const _host = location.hostname && location.hostname.length ? location.hostname : '127.0.0.1';
+const _protocol = (location.protocol && location.protocol.startsWith('http')) ? location.protocol : 'http:';
+const API_BASE = `${_protocol}//${_host}:5001`;
 
 let allSymptoms = [];         // full valid symptom list from backend
 let detectedSymptoms = new Set(); // symptoms found so far in conversation
@@ -42,7 +44,7 @@ fetch(`${API_BASE}/symptoms`)
         extractSymptoms = createMatcher(allSymptoms);
     })
     .catch(() => {
-        appendBotMessage("I'm having trouble connecting to the analysis server. Please make sure the backend (app.py) is running on 127.0.0.1:5000.");
+        appendBotMessage(`I'm having trouble connecting to the analysis server. Please make sure the backend (app.py) is running at ${API_BASE}.`);
     });
 
 // ---------------------------------------------------------

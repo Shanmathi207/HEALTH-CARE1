@@ -1,17 +1,27 @@
 {
   "name": "frontend",
   "version": "1.0.0",
+  "type": "module",
   "description": "![Smart Care Logo](https://img.shields.io/badge/Smart Care-Healthcare-2563eb?style=for-the-badge)\r ![Status](https://img.shields.io/badge/Status-Demo-10b981?style=for-the-badge)\r ![License](https://img.shields.io/badge/License-Educational-f59e0b?style=for-the-badge)",
   "main": "analysis.js",
   "scripts": {
-    "start": "live-server",
-    "dev": "live-server",
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "live-server": "^1.2.2"
+    "@vitejs/plugin-react": "^4.7.0",
+    "live-server": "^1.2.2",
+    "vite": "^5.4.21"
+  },
+  "dependencies": {
+    "lucide-react": "^1.33.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }
